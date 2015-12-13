@@ -3,7 +3,10 @@
             [cartagena.core :refer :all]))
 
 (deftest initialize-board-test
-  (let [board (initialize-board)]
-    (is (= 36 (count board)))
-    (doseq [icon [:bottle :gun :hat :key :knife :skull]]
-      (is (= 6 (count (filter #(= icon %) board)))))))
+  (testing "Returns the right number of spaces as well as icons"
+    (let [board (initialize-board)]
+      (is (= 36 (count board)))
+      (doseq [icon [:bottle :gun :hat :key :knife :skull]]
+        (is (= 6 (count (filter #(= icon %) board)))))))
+  (testing "Boards are not exactly alike"
+    (is (not (= (initialize-board) (initialize-board))))))
