@@ -10,3 +10,26 @@
         (is (= 6 (count (filter #(= icon %) board)))))))
   (testing "Boards are not exactly alike"
     (is (not (= (initialize-board) (initialize-board))))))
+
+(deftest shuffle-cards-test
+  (testing "Returns a random collection of N cards"))
+
+(deftest initialize-player-test
+  (testing "Returns a player data structure full of initial state data")
+  (testing "Each player should have six pirates")
+  (testing "Each player should have six cards"))
+
+(deftest new-game-test
+  (testing "Player count should be equal to the number to which it was initialized")
+  (testing "All players should be in jail")
+  (testing "Active player should be player 1"))
+
+(deftest player-move-test
+  (testing "Player can play card and move pieces")
+  (testing "Player can move backward and receives cards")
+  (testing "Player without cards must move backward")
+  (testing "Player with no available spaces behind cannot move backward")
+  (testing "Player with pirate on ship can move that pirate backward"))
+
+(deftest game-over-test
+  (testing "Game ends when a player has all pirates on the ship"))
