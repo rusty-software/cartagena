@@ -28,6 +28,14 @@
                             flatten
                             vec)))
 
+(defn shuffle-cards!
+  "Shuffles the card in the discard pile, placing them in the draw pile"
+  []
+  (when (and (not (empty? @discard-pile))
+             (empty? @draw-pile))
+    (reset! draw-pile (vec (shuffle @discard-pile)))
+    (reset! discard-pile [])))
+
 (defn initialize-board!
   "Returns a vector populated with icons from the 6 of the board pieces concatenated."
   []
