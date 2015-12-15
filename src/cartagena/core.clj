@@ -16,7 +16,19 @@
 (def all-board-pieces [board-piece1 board-piece2 board-piece3 board-piece4 board-piece5 board-piece6
                 board-piece1r board-piece2r board-piece3r board-piece4r board-piece5r board-piece6r])
 
-(defn initialize-board
+(def icons [:bottle :gun :hat :key :knife :skull])
+
+(def draw-pile (atom []))
+(def discard-pile (atom []))
+(defn place-cards!
+  "Puts the full set of cards into the discard pile"
+  []
+  (reset! discard-pile (->> icons
+                            (map #(repeat 17 %))
+                            flatten
+                            vec)))
+
+(defn initialize-board!
   "Returns a vector populated with icons from the 6 of the board pieces concatenated."
   []
   (->> all-board-pieces

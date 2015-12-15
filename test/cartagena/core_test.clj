@@ -2,17 +2,31 @@
   (:require [clojure.test :refer :all]
             [cartagena.core :refer :all]))
 
-(deftest initialize-board-test
+(defn reset-cards! [test-fn]
+  (reset! draw-pile [])
+  (reset! discard-pile [])
+  (test-fn))
+
+(use-fixtures :each reset-cards!)
+
+(deftest initialize-board!-test
   (testing "Returns the right number of spaces as well as icons"
-    (let [board (initialize-board)]
+    (let [board (initialize-board!)]
       (is (= 36 (count board)))
       (doseq [icon [:bottle :gun :hat :key :knife :skull]]
         (is (= 6 (count (filter #(= icon %) board)))))))
   (testing "Boards are not exactly alike"
-    (is (not (= (initialize-board) (initialize-board))))))
+    (is (not (= (initialize-board!) (initialize-board!))))))
 
-(deftest shuffle-cards-test
-  (testing "Returns a random collection of N cards"))
+(deftest place-cards!-test
+  (testing "Placing cards populates the discard pile"
+    (is (= [] @discard-pile))
+    (place-cards!)
+    (is (= 102 (count @discard-pile)))))
+
+(deftest shuffle-cards!-test
+  (testing "Returns a random collection of N cards")
+  (testing "Shuffling cards when the draw pile is empty does nothing"))
 
 (deftest initialize-player-test
   (testing "Returns a player data structure full of initial state data")
