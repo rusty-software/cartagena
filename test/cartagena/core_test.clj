@@ -43,10 +43,22 @@
       (shuffle-cards!)
       (is (= draws @draw-pile)))))
 
+(deftest draw-cards!-test
+  (testing "Drawing n cards removes them from the draw pile"
+    (place-cards!)
+    (shuffle-cards!)
+    (draw-cards! 6)
+    (is (= 96 (count @draw-pile)))))
+
 (deftest initialize-player-test
-  (testing "Returns a player data structure full of initial state data")
-  (testing "Each player should have six pirates")
-  (testing "Each player should have six cards"))
+  (testing "Returns a player data structure full of initial state data"
+    (place-cards!)
+    (shuffle-cards!)
+    (let [expected {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1]}
+          actual (initialize-player {:name "rusty" :color :black})]
+      (doseq [k (keys expected)]
+        (is (= (k expected) (k actual)) (str "key value mismatch for: " k)))
+      (is (= 6 (count (:cards actual)))))))
 
 (deftest new-game-test
   (testing "Player count should be equal to the number to which it was initialized")

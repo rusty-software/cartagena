@@ -45,6 +45,18 @@
        flatten
        vec))
 
+(defn draw-cards!
+  "Takes n cards off of the top of the draw pile"
+  [n]
+  (let [cards (take n @draw-pile)]
+    (reset! draw-pile (drop n @draw-pile))
+    (vec cards)))
+
+(defn initialize-player
+  "Initializes a player data structure"
+  [{:keys [name color]}]
+  {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards (draw-cards! 6)})
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
