@@ -58,10 +58,8 @@
   "Initializes a new game"
   [players]
   (let [board (initialize-board)
-        draw-pile (initialize-cards)
-        init-players (vec (map initialize-player players))
-        players-draw-pile (loop [ps init-players
-                                 cards draw-pile
+        players-draw-pile (loop [ps (vec (map initialize-player players))
+                                 cards (initialize-cards)
                                  acc []]
                             (if (empty? ps)
                               acc
