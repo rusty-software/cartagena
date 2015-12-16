@@ -6,4 +6,6 @@
   :dependencies [[org.clojure/clojure "1.7.0"]]
   :main ^:skip-aot cartagena.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:uberjar {:aot :all}}
+  :test-selectors {:default (constantly true)
+                   :single :single})
