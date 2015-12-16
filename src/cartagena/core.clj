@@ -57,6 +57,17 @@
   [{:keys [name color]}]
   {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards (draw-cards! 6)})
 
+(defn new-game
+  "Initializes a new game"
+  [players]
+  (place-cards!)
+  (shuffle-cards!)
+  (let [game-state (assoc {}
+                     :players
+                     (vec (for [player players]
+                            (initialize-player player))))]
+    (assoc game-state :current-player 0)))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]

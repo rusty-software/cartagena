@@ -11,10 +11,10 @@
 
 (deftest initialize-board!-test
   (testing "Returns the right number of spaces as well as icons"
-    (let [board (initialize-board!)]
-      (is (= 36 (count board)))
+    (let [board-spaces (initialize-board!)]
+      (is (= 36 (count board-spaces)))
       (doseq [icon [:bottle :gun :hat :key :knife :skull]]
-        (is (= 6 (count (filter #(= icon %) board)))))))
+        (is (= 6 (count (filter #(= icon %) board-spaces)))))))
   (testing "Boards are not exactly alike"
     (is (not (= (initialize-board!) (initialize-board!))))))
 
@@ -61,9 +61,16 @@
       (is (= 6 (count (:cards actual)))))))
 
 (deftest new-game-test
-  (testing "Player count should be equal to the number to which it was initialized")
-  (testing "All players should be in jail")
-  (testing "Active player should be player 1"))
+  (testing "All game state is initialized correctly"
+    (let [players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]
+          game-state (new-game players)]
+      (testing "Player state is correct"
+        (is (= 2 (count (:players game-state))))
+        (is (= 0 (:current-player game-state)))
+        (is (= "tanya" (get-in game-state [:players 0 :name]))))
+      (testing "Card state is correct"
+        (is (= 6 (count (get-in game-state [:players 0 :cards]))))
+        (is (= 90 (count @draw-pile)))))) )
 
 (deftest player-move-test
   (testing "Player can play card and move pieces")
