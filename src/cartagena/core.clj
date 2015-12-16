@@ -51,7 +51,7 @@
 (defn draw-cards
   "Pulls cards off the top of the draw pile, returning a map of the new hand and what remains in the draw pile"
   [n player draw-pile]
-  {:player (assoc player :cards (cond (:cards player) (vec (take n draw-pile))))
+  {:player (assoc player :cards (apply conj (:cards player) (take n draw-pile)))
    :draw-pile (vec (drop n draw-pile))})
 
 (defn new-game!

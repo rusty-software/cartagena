@@ -32,22 +32,20 @@
       (is (= (count cards) (count shuffled)))
       (is (not (= cards shuffled))))))
 
-#_(deftest draw-cards!-test
-  (testing "Drawing n cards removes them from the draw pile"
-    (place-cards!)
-    (shuffle-cards!)
-    (draw-cards! 6)
-    (is (= 96 (count @draw-pile)))))
-
-#_(deftest initialize-player-test
+(deftest initialize-player-test
   (testing "Returns a player data structure full of initial state data"
-    (place-cards!)
-    (shuffle-cards!)
-    (let [expected {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1]}
+    (let [expected {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards []}
           actual (initialize-player {:name "rusty" :color :black})]
       (doseq [k (keys expected)]
-        (is (= (k expected) (k actual)) (str "key value mismatch for: " k)))
-      (is (= 6 (count (:cards actual)))))))
+        (is (= (k expected) (k actual)) (str "key value mismatch for: " k))))))
+
+(deftest draw-cards-test
+  (testing "Drawing cards for a player expands the card collection and reduces the draw pile"
+    (let [player {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards [:key :hat]}
+          draw-pile [:skull :gun :bottle :knife]
+          expected {:player (assoc player :cards [:key :hat :skull :gun])
+                    :draw-pile [:bottle :knife]}]
+      (is (= expected (draw-cards 2 player draw-pile))))))
 
 (deftest new-game-test
   (testing "All game state is initialized correctly"
