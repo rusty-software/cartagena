@@ -9,39 +9,28 @@
 
 #_(use-fixtures :each reset-cards!)
 
-#_(deftest initialize-board!-test
+(deftest initialize-board-test
   (testing "Returns the right number of spaces as well as icons"
-    (let [board-spaces (initialize-board!)]
+    (let [board-spaces (initialize-board)]
       (is (= 36 (count board-spaces)))
       (doseq [icon [:bottle :gun :hat :key :knife :skull]]
         (is (= 6 (count (filter #(= icon %) board-spaces)))))))
   (testing "Boards are not exactly alike"
-    (is (not (= (initialize-board!) (initialize-board!))))))
+    (is (not (= (initialize-board) (initialize-board))))))
 
-#_(deftest place-cards!-test
-  (testing "Placing cards populates the discard pile"
-    (is (= 0 (count @discard-pile)))
-    (place-cards!)
-    (is (= 102 (count @discard-pile)))))
+(deftest initialize-cards-test
+  (testing "Returns a pile of 102 cards, 17 of each icon"
+    (let [cards (initialize-cards)]
+      (is (= 102 (count cards)))
+      (doseq [icon icons]
+        (is (= 17 (count (filter #(= icon %) cards))))))))
 
-#_(deftest shuffle-cards!-test
-  (testing "Shuffles the cards in the discard pile and places them in the draw pile"
-    (place-cards!)
-    (is (= 0 (count @draw-pile)))
-    (let [discards (vec @discard-pile)]
-      (shuffle-cards!)
-      (is (= 102 (count @draw-pile)))
-      (is (= 0 (count @discard-pile)))
-      (is (not (= discards @draw-pile)))))
-  (testing "Shuffling cards when the draw pile is empty does nothing"
-    (place-cards!)
-    (reset! draw-pile @discard-pile)
-    (reset! discard-pile [])
-    (is (= 0 (count @discard-pile)))
-    (is (= 102 (count @draw-pile)))
-    (let [draws @draw-pile]
-      (shuffle-cards!)
-      (is (= draws @draw-pile)))))
+(deftest shuffle-cards-test
+  (testing "Returns the same count but in different (random) order"
+    (let [cards [:key :key :knife :knife :skull :skull :gun :gun :bottle :bottle :hat :hat]
+          shuffled (shuffle-cards cards)]
+      (is (= (count cards) (count shuffled)))
+      (is (not (= cards shuffled))))))
 
 #_(deftest draw-cards!-test
   (testing "Drawing n cards removes them from the draw pile"
