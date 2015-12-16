@@ -18,26 +18,10 @@
 
 (def icons [:bottle :gun :hat :key :knife :skull])
 
-(def draw-pile (atom []))
-(def discard-pile (atom []))
-(defn place-cards!
-  "Puts the full set of cards into the discard pile"
-  []
-  (reset! discard-pile (->> icons
-                            (map #(repeat 17 %))
-                            flatten
-                            vec)))
+(def game-state (atom {}))
 
-(defn shuffle-cards!
-  "Shuffles the card in the discard pile, placing them in the draw pile"
-  []
-  (when (and (not (empty? @discard-pile))
-             (empty? @draw-pile))
-    (reset! draw-pile (vec (shuffle @discard-pile)))
-    (reset! discard-pile [])))
-
-(defn initialize-board!
-  "Returns a vector populated with icons from the 6 of the board pieces concatenated."
+(defn initialize-board
+  "Generates a board from 6 random pieces"
   []
   (->> all-board-pieces
        shuffle
@@ -45,24 +29,54 @@
        flatten
        vec))
 
-(defn draw-cards!
-  "Takes n cards off of the top of the draw pile"
-  [n]
-  (let [cards (take n @draw-pile)]
-    (reset! draw-pile (drop n @draw-pile))
-    (vec cards)))
+(defn shuffle-cards
+  "Shuffles and returns passed cards"
+  [cards]
+  (vec (shuffle cards)))
+
+(defn initialize-cards
+  "Puts the full set of cards into the discard pile"
+  []
+  (->> icons
+       (map #(repeat 17 %))
+       flatten
+       shuffle-cards
+       vec))
 
 (defn initialize-player
   "Initializes a player data structure"
   [{:keys [name color]}]
-  {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards (draw-cards! 6)})
+  {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards []})
 
-(defn new-game
+(defn draw-cards
+  "Pulls cards off the top of the draw pile, returning a map of the new hand and what remains in the draw pile"
+  [n player draw-pile]
+  {:player (assoc player :cards (cond (:cards player) (vec (take n draw-pile))))
+   :draw-pile (vec (drop n draw-pile))})
+
+(defn new-game!
   "Initializes a new game"
   [players]
-  (place-cards!)
-  (shuffle-cards!)
-  (let [game-state (assoc {}
+  (let [board (initialize-board)
+        draw-pile (initialize-cards)
+        init-players (vec (map initialize-player players))
+        players-draw-pile (loop [ps init-players
+                                 cards draw-pile
+                                 acc []]
+                            (if (empty? ps)
+                              acc
+                              (let [player-draw-pile (draw-cards 6 (first ps) cards)]
+                                (recur (rest ps) (:draw-pile player-draw-pile) (conj acc player-draw-pile)))))
+        init-players (vec (map :player players-draw-pile))
+        draw-pile (:draw-pile (last players-draw-pile))]
+    (reset! game-state {:board-spaces board
+                        :players init-players
+                        :current-player 0
+                        :draw-pile draw-pile
+                        :discard-pile []}))
+
+
+  #_(let [game-state (assoc {}
                      :players
                      (vec (for [player players]
                             (initialize-player player))))]
