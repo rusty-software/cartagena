@@ -49,10 +49,21 @@
   {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards []})
 
 (defn draw-cards
-  "Pulls cards off the top of the draw pile, returning a map of the new hand and what remains in the draw pile"
-  [n player draw-pile]
-  {:player (assoc player :cards (apply conj (:cards player) (take n draw-pile)))
-   :draw-pile (vec (drop n draw-pile))})
+  "Draws cards off of the draw pile and puts them in the player's hand.  If there aren't enough cards in the draw pile, the discard pile is shuffled into the draw pile.  Returns a map of the affected player, draw pile, and discard pile."
+  [n player draw-pile discard-pile]
+  (if (< (count draw-pile) n)
+    (let [drawn-cards draw-pile
+          draw-pile (shuffle-cards discard-pile)
+          left-to-draw (- n (count drawn-cards))
+          more-cards (vec (take left-to-draw draw-pile))
+          draw-pile (vec (drop left-to-draw draw-pile))
+          all-drawn (apply conj drawn-cards more-cards)]
+      {:player (assoc player :cards (apply conj (:cards player) all-drawn))
+       :draw-pile draw-pile
+       :discard-pile []})
+    {:player (assoc player :cards (apply conj (:cards player) (take n draw-pile)))
+     :draw-pile (vec (drop n draw-pile))
+     :discard-pile discard-pile}))
 
 (defn new-game!
   "Initializes a new game"
@@ -63,13 +74,14 @@
                                  acc []]
                             (if (empty? ps)
                               acc
-                              (let [player-draw-pile (draw-cards 6 (first ps) cards)]
+                              (let [player-draw-pile (draw-cards 6 (first ps) cards [])]
                                 (recur (rest ps) (:draw-pile player-draw-pile) (conj acc player-draw-pile)))))
         init-players (vec (map :player players-draw-pile))
         draw-pile (:draw-pile (last players-draw-pile))]
     (reset! game-state {:board-spaces board
                         :players init-players
-                        :current-player 0
+                        :player-order (vec (map :name init-players))
+                        :current-player (:name (first init-players))
                         :draw-pile draw-pile
                         :discard-pile []})))
 

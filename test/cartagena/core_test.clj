@@ -36,19 +36,20 @@
   (testing "Drawing cards for a player expands the card collection and reduces the draw pile"
     (let [player {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards [:key :hat]}
           draw-pile [:skull :gun :bottle :knife]
+          discard-pile [:bottle :gun :hat :key :knife :skull]
           expected {:player (assoc player :cards [:key :hat :skull :gun])
-                    :draw-pile [:bottle :knife]}]
-      (is (= expected (draw-cards 2 player draw-pile))))))
-
-(deftest update-player!-test
-  (let [players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]]
-    (testing "Can update values except name"
-      (new-game! players)
-      (update-player! "rusty" {:color :green :pirates [1 2 3 4 5 6] :cards [:skull :knife :bottle]})
-      (let [actual-player (first (filter #(= "rusty" (:name %)) (:players @game-state)))]
-        (is (= :green (:color actual-player)))
-        (is (= [1 2 3 4 5 6] (:pirates actual-player)))
-        (is (= [:skull :knife :bottle] (:cards actual-player)))))))
+                    :draw-pile [:bottle :knife]
+                    :discard-pile discard-pile}]
+      (is (= expected (draw-cards 2 player draw-pile discard-pile)))))
+  (testing "When the draw pile doesn't have enough, discard is shuffled into the draw pile"
+    (let [player {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards [:key :hat]}
+          draw-pile [:skull]
+          discard-pile [:gun :bottle :knife]
+          certain-cards #{:key :hat :skull}
+          actual (draw-cards 2 player draw-pile discard-pile)]
+      (doseq [card certain-cards]
+        (is (filter #(= card %) (:cards player))))
+      (is (= 2 (count (:draw-pile actual)))))))
 
 (defn assert-player-state []
   (is (= 2 (count (:players @game-state))))
@@ -71,21 +72,21 @@
       (testing "Board state is correct"
         (assert-board-state)))))
 
-#_(deftest discard-card-test
-  (testing "Discarding a card adds it to the discard pile"
-    (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
-    (discard! :key)
-    (is (= 1 (count (:discard-pile @game-state))))
-    (is (= :key (first (:discard-pile @game-state))))))
+;(deftest discard-card-test
+;  (testing "Discarding a card adds it to the discard pile"
+;    (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
+;    (discard! :key)
+;    (is (= 1 (count (:discard-pile @game-state))))
+;    (is (= :key (first (:discard-pile @game-state))))))
 
-#_(deftest ^:single play-card-test
-  (testing "Playing a card moves the selected pirate to first open space bearing the card's icon"
-    (let [board-spaces [:bottle :gun :hat :key :knife :skull :bottle :gun :hat :key :knife :skull]
-          player {:name "tanya" :color :orange :pirates [-1 -1 -1 -1 -1 -1] :cards [:hat :key :skull]}
-          card :key
-          pirate 0
-          expected-player {:name "tanya" :color :orange :pirates [3 -1 -1 -1 -1 -1] :cards [:hat :skull]}
-          updated-player (play-card player card pirate board-spaces)])))
+;(deftest ^:single play-card-test
+;  (testing "Playing a card moves the selected pirate to first open space bearing the card's icon"
+;    (let [board-spaces [:bottle :gun :hat :key :knife :skull :bottle :gun :hat :key :knife :skull]
+;          player {:name "tanya" :color :orange :pirates [-1 -1 -1 -1 -1 -1] :cards [:hat :key :skull]}
+;          card :key
+;          pirate 0
+;          expected-player {:name "tanya" :color :orange :pirates [3 -1 -1 -1 -1 -1] :cards [:hat :skull]}
+;          updated-player (play-card player card pirate board-spaces)])))
 
 (deftest player-move-test
   (testing "Player can play card and move pieces")
