@@ -71,14 +71,16 @@
                         :players init-players
                         :current-player 0
                         :draw-pile draw-pile
-                        :discard-pile []}))
+                        :discard-pile []})))
 
-
-  #_(let [game-state (assoc {}
-                     :players
-                     (vec (for [player players]
-                            (initialize-player player))))]
-    (assoc game-state :current-player 0)))
+(defn update-player!
+  "Updates the data for a single player by name"
+  [name kvs]
+  (let [player (first (filter #(= name (:name %)) (:players @game-state)))
+        updated-player (merge player kvs)
+        updated-players (merge (remove #(= name (:name %)) (:players @game-state)) updated-player)
+        updated-state (assoc @game-state :players updated-players)]
+    (reset! game-state updated-state)))
 
 (defn -main
   "I don't do a whole lot ... yet."

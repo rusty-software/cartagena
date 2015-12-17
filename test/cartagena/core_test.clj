@@ -2,13 +2,6 @@
   (:require [clojure.test :refer :all]
             [cartagena.core :refer :all]))
 
-#_(defn reset-cards! [test-fn]
-  (reset! draw-pile [])
-  (reset! discard-pile [])
-  (test-fn))
-
-#_(use-fixtures :each reset-cards!)
-
 (deftest initialize-board-test
   (testing "Returns the right number of spaces as well as icons"
     (let [board-spaces (initialize-board)]
@@ -47,22 +40,54 @@
                     :draw-pile [:bottle :knife]}]
       (is (= expected (draw-cards 2 player draw-pile))))))
 
+(deftest update-player!-test
+  (let [players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]]
+    (testing "Can update values except name"
+      (new-game! players)
+      (update-player! "rusty" {:color :green :pirates [1 2 3 4 5 6] :cards [:skull :knife :bottle]})
+      (let [actual-player (first (filter #(= "rusty" (:name %)) (:players @game-state)))]
+        (is (= :green (:color actual-player)))
+        (is (= [1 2 3 4 5 6] (:pirates actual-player)))
+        (is (= [:skull :knife :bottle] (:cards actual-player)))))))
+
+(defn assert-player-state []
+  (is (= 2 (count (:players @game-state))))
+  (is (= "tanya" (get-in @game-state [:players 0 :name]))))
+(defn assert-card-state []
+  (is (= 6 (count (get-in @game-state [:players 0 :cards]))))
+  (is (= 90 (count (:draw-pile @game-state))))
+  (is (= 0 (count (:discard-pile @game-state)))))
+(defn assert-board-state []
+  (is (= 36 (count (:board-spaces @game-state)))))
+
 (deftest new-game-test
   (testing "All game state is initialized correctly"
     (let [players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]]
       (new-game! players)
       (testing "Player state is correct"
-        (is (= 2 (count (:players @game-state))) "Should be two players in the collection")
-        (is (= 0 (:current-player @game-state)) "Active player should be 0")
-        (is (= "tanya" (get-in @game-state [:players 0 :name]))) "Tanya should be the first player name")
+        (assert-player-state))
       (testing "Card state is correct"
-        (is (= 6 (count (get-in @game-state [:players 0 :cards]))))
-        (is (= 90 (count (:draw-pile @game-state))))
-        (is (= 0 (count (:discard-pile @game-state)))))
+        (assert-card-state))
       (testing "Board state is correct"
-        (is (= 36 (count (:board-spaces @game-state))))))))
+        (assert-board-state)))))
 
-(deftest ^:single player-move-test
+#_(deftest discard-card-test
+  (testing "Discarding a card adds it to the discard pile"
+    (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
+    (discard! :key)
+    (is (= 1 (count (:discard-pile @game-state))))
+    (is (= :key (first (:discard-pile @game-state))))))
+
+#_(deftest ^:single play-card-test
+  (testing "Playing a card moves the selected pirate to first open space bearing the card's icon"
+    (let [board-spaces [:bottle :gun :hat :key :knife :skull :bottle :gun :hat :key :knife :skull]
+          player {:name "tanya" :color :orange :pirates [-1 -1 -1 -1 -1 -1] :cards [:hat :key :skull]}
+          card :key
+          pirate 0
+          expected-player {:name "tanya" :color :orange :pirates [3 -1 -1 -1 -1 -1] :cards [:hat :skull]}
+          updated-player (play-card player card pirate board-spaces)])))
+
+(deftest player-move-test
   (testing "Player can play card and move pieces")
   (testing "Player can move backward and receives cards")
   (testing "Player without cards must move backward")
