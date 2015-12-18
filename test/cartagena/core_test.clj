@@ -73,7 +73,7 @@
         (assert-board-state)))))
 
 (deftest play-card-test
-  ; board-spaces becomes a vector of vectors that contain keys for pirate colors they contain? or players?  maybe players should be color-based?
+  ; board-spaces becomes a vector of vectors that contain keys for pirate colors they contain? or players?  maybe players should be color-based? {:orange {:name "tanya"...) :black {:name "rusty"...}}
   (let [expected {:player {:cards updated-cards
                            :pirates updated-pirates}
                   :board-spaces updated-spaces
