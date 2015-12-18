@@ -45,8 +45,9 @@
 
 (defn initialize-player
   "Initializes a player data structure"
-  [{:keys [name color]}]
-  {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards []})
+  [player]
+  (println "player:" player)
+  {(:color player) {:name name :pirates [-1 -1 -1 -1 -1 -1] :cards []}})
 
 (defn draw-cards
   "Draws cards off of the draw pile and puts them in the player's hand.  If there aren't enough cards in the draw pile, the discard pile is shuffled into the draw pile.  Returns a map of the affected player, draw pile, and discard pile."
@@ -69,9 +70,16 @@
   "Initializes a new game"
   [players]
   (let [board (initialize-board)
-        players-draw-pile (loop [ps (vec (map initialize-player players))
+        init-players (loop [players players
+                            acc {}]
+                       (if (empty? players)
+                         acc
+                         (recur (rest players) (merge acc (initialize-player (first players))))))
+        _ (println "init-players:" init-players)
+        players-draw-pile (loop [ps init-players
                                  cards (initialize-cards)
                                  acc []]
+                            (println ps)
                             (if (empty? ps)
                               acc
                               (let [player-draw-pile (draw-cards 6 (first ps) cards [])]
