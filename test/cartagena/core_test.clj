@@ -84,10 +84,35 @@
       (testing "Board state is correct"
         (assert-board-state)))))
 
+(deftest is-open-target?-test
+  (is (is-open-target? {:icon :hat :pirates [:orange :orange]} :hat))
+  (is (not (is-open-target? {:icon :bottle :pirates []} :hat)))
+  (is (not (is-open-target? {:icon :hat :pirates [:orange :black :green]} :hat))))
+
+(deftest open-space-index-test
+  (let [space-index 1
+        icon :skull
+        board [{:icon :bottle :pirates [:orange]}
+               {:icon :hat :pirates [:black :orange]}
+               {:icon :knife :pirates []}
+               {:icon :bottle :pirates [:black]}
+               {:icon :skull :pirates []}
+               {:icon :skull :pirates [:black]}
+               {:icon :ship :pirates []}]]
+    (testing "Given a starting index, board, and icon, finds the first open space after the starting index"
+      (is (= 4 (open-space-index space-index board icon))))
+    (testing "Spaces with three pirates are skipped"
+      (let [board (assoc board 4 {:icon :skull :pirates [:black :black :black]})]
+        (is (= 5 (open-space-index space-index board icon)))))
+    (testing "If no spaces are available, advance to ship"
+      (let [board (assoc board 4 {:icon :skull :pirates [:black :black :black]}
+                               5 {:icon :skull :pirates [:black :black :black]})]
+        (is (= 6 (open-space-index space-index board icon)))))))
+
 (deftest play-card-test
   (testing "Moves the player's pirate from a space to the next space with the card's icon"
     (let [player {:name "tanya" :color :orange :cards [:hat :skull :knife]}
-          card :skull
+          icon :skull
           from-space {:icon :hat :pirates [:black :orange]}
           board [{:icon :bottle :pirates [:orange]}
                  from-space
@@ -96,7 +121,8 @@
                  {:icon :skull :pirates []}
                  {:icon :skull :pirates [:black]}]
           discard-pile [:gun :key]
-          updated-spaces [{:icon :hat :pirates [:black]}
+          updated-spaces [{:icon :bottle :pirates [:orange]}
+                          {:icon :hat :pirates [:black]}
                           {:icon :knife :pirates []}
                           {:icon :bottle :pirates [:black]}
                           {:icon :skull :pirates [:orange]}
@@ -104,7 +130,7 @@
           expected {:player {:cards [:hat :knife]}
                     :board-spaces updated-spaces
                     :discard-pile [:gun :key :skull]}
-          updated-state (play-card player card from-space board discard-pile)]
+          updated-state (play-card player icon from-space board discard-pile)]
       (is (= expected updated-state)))))
 
 ;(deftest discard-card-test

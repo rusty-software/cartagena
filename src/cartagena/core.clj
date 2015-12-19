@@ -82,9 +82,33 @@
                         :draw-pile draw-pile
                         :discard-pile []})))
 
+(defn is-open-target?
+  "Returns true if the space matches the icon and has fewer than three pirates"
+  [space icon]
+  (and (= icon (:icon space))
+       (< (count (:pirates space)) 3)))
+
+(defn open-space-index
+  "Returns the index of the first open space for the given icon after the starting index."
+  [starting-index board icon]
+  (or
+    (some #(let [space (get board %)]
+            (when (is-open-target? space icon) %))
+          (range (inc starting-index) (count board)))
+    (dec (count board))))
+
 (defn play-card
-  ""
-  [player card from-space board discard-pile])
+  "Discards the card and moves a single pirate from the space to the next available space."
+  [player icon from-space board discard-pile]
+  (let [[pre-cards post-cards] (split-with #(not= icon %) (:cards player))
+        [pre-pirates post-pirates] (split-with #(not= (:color player) %) (:pirates from-space))
+        space-index (.indexOf board from-space)
+        next-open-space-index (open-space-index space-index board icon)
+        next-open-space (get board next-open-space-index)]
+    {:player {:cards (concat pre-cards (rest post-cards))}
+     :board-spaces (assoc board space-index (assoc from-space :pirates (vec (flatten (concat pre-pirates (rest post-pirates)))))
+                         next-open-space-index (assoc next-open-space :pirates (conj (:pirates next-open-space) (:color player))))
+     :discard-pile (conj discard-pile icon)}))
 
 (defn update-player!
   "Updates the data for a single player by name"
