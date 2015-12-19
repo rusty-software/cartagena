@@ -4,14 +4,21 @@
 
 (deftest initialize-board-test
   (testing "Returns the right number of spaces as well as icons"
-    (let [board-spaces (initialize-board)]
-      (is (= 36 (count board-spaces)))
-      (doseq [space board-spaces]
+    (let [expected-jail {:icon :jail :pirates []}
+          expected-ship {:icon :ship :pirates []}
+          board-spaces (initialize-board)
+          actual-jail (first board-spaces)
+          actual-ship (last board-spaces)
+          player-spaces (butlast (rest board-spaces))]
+      (is (= expected-jail actual-jail))
+      (is (= expected-ship actual-ship))
+      (is (= 36 (count player-spaces)))
+      (doseq [space player-spaces]
         (is (not (nil? (:pirates space))))
         (is (empty? (:pirates space)))
         (is (some #{(:icon space)} icons)))
       (doseq [icon icons]
-        (is (= 6 (count (filter #(= icon (:icon %)) board-spaces)))))))
+        (is (= 6 (count (filter #(= icon (:icon %)) player-spaces)))))))
   (testing "Boards are not exactly alike"
     (is (not (= (initialize-board) (initialize-board))))))
 
