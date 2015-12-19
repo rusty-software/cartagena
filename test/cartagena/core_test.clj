@@ -19,8 +19,9 @@
         (is (some #{(:icon space)} icons)))
       (doseq [icon icons]
         (is (= 6 (count (filter #(= icon (:icon %)) player-spaces)))))))
+  ;; fragile test follows: it's possible that three draws in a row would be the same...
   (testing "Boards are not exactly alike"
-    (is (not (= (initialize-board) (initialize-board))))))
+    (is (not (= (initialize-board) (initialize-board) (initialize-board))))))
 
 (deftest initialize-cards-test
   (testing "Returns a pile of 102 cards, 17 of each icon"
@@ -38,14 +39,14 @@
 
 (deftest initialize-player-test
   (testing "Returns a player data structure full of initial state data"
-    (let [expected {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards []}
+    (let [expected {:name "rusty" :color :black :cards []}
           actual (initialize-player {:name "rusty" :color :black})]
       (doseq [k (keys expected)]
         (is (= (k expected) (k actual)) (str "key value mismatch for: " k))))))
 
 (deftest draw-cards-test
   (testing "Drawing cards for a player expands the card collection and reduces the draw pile"
-    (let [player {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards [:key :hat]}
+    (let [player {:name "rusty" :color :black :cards [:key :hat]}
           draw-pile [:skull :gun :bottle :knife]
           discard-pile [:bottle :gun :hat :key :knife :skull]
           expected {:player (assoc player :cards [:key :hat :skull :gun])
@@ -53,7 +54,7 @@
                     :discard-pile discard-pile}]
       (is (= expected (draw-cards 2 player draw-pile discard-pile)))))
   (testing "When the draw pile doesn't have enough, discard is shuffled into the draw pile"
-    (let [player {:name "rusty" :color :black :pirates [-1 -1 -1 -1 -1 -1] :cards [:key :hat]}
+    (let [player {:name "rusty" :color :black :cards [:key :hat]}
           draw-pile [:skull]
           discard-pile [:gun :bottle :knife]
           certain-cards #{:key :hat :skull}
@@ -70,7 +71,7 @@
   (is (= 90 (count (:draw-pile @game-state))))
   (is (= 0 (count (:discard-pile @game-state)))))
 (defn assert-board-state []
-  (is (= 36 (count (:board-spaces @game-state)))))
+  (is (= 38 (count (:board-spaces @game-state)))))
 
 (deftest new-game-test
   (testing "All game state is initialized correctly"
@@ -83,14 +84,28 @@
       (testing "Board state is correct"
         (assert-board-state)))))
 
-;(deftest play-card-test
-;  ; board-spaces becomes a vector of vectors that contain keys for pirate colors they contain? or players?
-;  (let [expected {:player {:cards updated-cards
-;                           :pirates updated-pirates}
-;                  :board-spaces updated-spaces
-;                  :discard-pile updated-discard-pile}
-;        updated-state (play-card player card pirate board discard-pile)]
-;    (is (= expected updated-state))))
+(deftest play-card-test
+  (testing "Moves the player's pirate from a space to the next space with the card's icon"
+    (let [player {:name "tanya" :color :orange :cards [:hat :skull :knife]}
+          card :skull
+          from-space {:icon :hat :pirates [:black :orange]}
+          board [{:icon :bottle :pirates [:orange]}
+                 from-space
+                 {:icon :knife :pirates []}
+                 {:icon :bottle :pirates [:black]}
+                 {:icon :skull :pirates []}
+                 {:icon :skull :pirates [:black]}]
+          discard-pile [:gun :key]
+          updated-spaces [{:icon :hat :pirates [:black]}
+                          {:icon :knife :pirates []}
+                          {:icon :bottle :pirates [:black]}
+                          {:icon :skull :pirates [:orange]}
+                          {:icon :skull :pirates [:black]}]
+          expected {:player {:cards [:hat :knife]}
+                    :board-spaces updated-spaces
+                    :discard-pile [:gun :key :skull]}
+          updated-state (play-card player card from-space board discard-pile)]
+      (is (= expected updated-state)))))
 
 ;(deftest discard-card-test
 ;  (testing "Discarding a card adds it to the discard pile"

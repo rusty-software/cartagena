@@ -29,7 +29,7 @@
 (defn shuffle-cards
   "Shuffles and returns passed cards"
   [cards]
-  (vec (shuffle cards)))
+  (shuffle cards))
 
 (defn initialize-cards
   "Puts the full set of cards into the discard pile"
@@ -43,7 +43,7 @@
 (defn initialize-player
   "Initializes a player data structure"
   [{:keys [name color]}]
-  {:name name :color color :pirates [-1 -1 -1 -1 -1 -1] :cards []})
+  {:name name :color color :cards []})
 
 (defn draw-cards
   "Draws cards off of the draw pile and puts them in the player's hand.  If there aren't enough cards in the draw pile, the discard pile is shuffled into the draw pile.  Returns a map of the affected player, draw pile, and discard pile."
@@ -81,6 +81,10 @@
                         :current-player (:name (first init-players))
                         :draw-pile draw-pile
                         :discard-pile []})))
+
+(defn play-card
+  ""
+  [player card from-space board discard-pile])
 
 (defn update-player!
   "Updates the data for a single player by name"
