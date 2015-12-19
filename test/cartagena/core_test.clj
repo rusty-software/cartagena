@@ -6,8 +6,12 @@
   (testing "Returns the right number of spaces as well as icons"
     (let [board-spaces (initialize-board)]
       (is (= 36 (count board-spaces)))
-      (doseq [icon [:bottle :gun :hat :key :knife :skull]]
-        (is (= 6 (count (filter #(= icon %) board-spaces)))))))
+      (doseq [space board-spaces]
+        (is (not (nil? (:pirates space))))
+        (is (empty? (:pirates space)))
+        (is (some #{(:icon space)} icons)))
+      (doseq [icon icons]
+        (is (= 6 (count (filter #(= icon (:icon %)) board-spaces)))))))
   (testing "Boards are not exactly alike"
     (is (not (= (initialize-board) (initialize-board))))))
 

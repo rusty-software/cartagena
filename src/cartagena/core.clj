@@ -23,11 +23,12 @@
 (defn initialize-board
   "Generates a board from 6 random pieces"
   []
-  (->> all-board-pieces
-       shuffle
-       (take 6)
-       flatten
-       vec))
+  (let [space-icons (->> all-board-pieces
+                         shuffle
+                         (take 6)
+                         flatten)]
+    (vec (for [space-icon space-icons]
+           {:icon space-icon :pirates []}))))
 
 (defn shuffle-cards
   "Shuffles and returns passed cards"
