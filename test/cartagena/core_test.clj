@@ -129,9 +129,32 @@
                           {:icon :skull :pirates [:black]}]
           expected {:player {:cards [:hat :knife]}
                     :board-spaces updated-spaces
-                    :discard-pile [:gun :key :skull]}
-          updated-state (play-card player icon from-space board discard-pile)]
-      (is (= expected updated-state)))))
+                    :discard-pile [:gun :key :skull]}]
+      (is (= expected (play-card player icon from-space board discard-pile))))))
+
+(deftest move-back-test
+  (testing "Can move back to the first space with one or two pirates"
+    (let [player {:name "tanya" :color :orange :cards [:hat :skull :knife]}
+          from-space {:icon :hat :pirates [:black :orange]}
+          board [{:icon :bottle :pirates [:orange]}
+                 {:icon :knife :pirates []}
+                 {:icon :bottle :pirates [:black]}
+                 {:icon :skull :pirates []}
+                 from-space
+                 {:icon :skull :pirates [:black]}]
+          draw-pile [:gun :key]
+          updated-spaces [{:icon :bottle :pirates [:orange]}
+                          {:icon :knife :pirates []}
+                          {:icon :bottle :pirates [:black :orange]}
+                          {:icon :skull :pirates []}
+                          {:icon :hat :pirates [:black]}
+                          {:icon :skull :pirates [:black]}]
+          expected {:player {:cards [:hat :knife]}
+                    :board-spaces updated-spaces
+                    :draw-pile [:key]}]
+      (is (= expected (move-back player from-space board draw-pile)))))
+  (testing "Skips over spaces with three pirates")
+  (testing "Does not allow moving back to jail"))
 
 ;(deftest discard-card-test
 ;  (testing "Discarding a card adds it to the discard pile"

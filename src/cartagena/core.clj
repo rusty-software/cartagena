@@ -107,7 +107,7 @@
         next-open-space (get board next-open-space-index)]
     {:player {:cards (concat pre-cards (rest post-cards))}
      :board-spaces (assoc board space-index (assoc from-space :pirates (vec (flatten (concat pre-pirates (rest post-pirates)))))
-                         next-open-space-index (assoc next-open-space :pirates (conj (:pirates next-open-space) (:color player))))
+                                next-open-space-index (assoc next-open-space :pirates (conj (:pirates next-open-space) (:color player))))
      :discard-pile (conj discard-pile icon)}))
 
 (defn update-player!
