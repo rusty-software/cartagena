@@ -149,7 +149,7 @@
                           {:icon :skull :pirates []}
                           {:icon :hat :pirates [:black]}
                           {:icon :skull :pirates [:black]}]
-          expected {:player {:cards [:hat :knife]}
+          expected {:player {:cards [:hat :skull :knife :gun]}
                     :board-spaces updated-spaces
                     :draw-pile [:key]}]
       (is (= expected (move-back player from-space board draw-pile)))))

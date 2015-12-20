@@ -110,6 +110,11 @@
                                 next-open-space-index (assoc next-open-space :pirates (conj (:pirates next-open-space) (:color player))))
      :discard-pile (conj discard-pile icon)}))
 
+(defn move-back
+  "Moves a single pirate back to the first available space."
+  [player from-space board draw-pile]
+  )
+
 (defn update-player!
   "Updates the data for a single player by name"
   [name kvs]
