@@ -194,7 +194,21 @@
     (testing "Does not allow moving back to jail"
       (let [board (assoc board 3 {:icon :bottle :pirates [:black :black :black]}
                                1 {:icon :bottle :pirates []})]
-        (is (nil? (move-back player from-space board draw-pile discard-pile)))))))
+        (is (nil? (move-back player from-space board draw-pile discard-pile)))))
+    (testing "Draws two cards for landing on space with two pirates"
+      (let [board (assoc board 3 {:icon :bottle :pirates [:black :black]})
+            updated-spaces [{:icon :jail :pirates []}
+                            {:icon :bottle :pirates [:orange]}
+                            {:icon :knife :pirates []}
+                            {:icon :bottle :pirates [:black :black :orange]}
+                            {:icon :skull :pirates []}
+                            {:icon :hat :pirates [:black]}
+                            {:icon :skull :pirates [:black]}]
+            expected {:player (assoc player :cards [:hat :skull :knife :gun :key])
+                      :board-spaces updated-spaces
+                      :draw-pile []
+                      :discard-pile [:knife]}]
+        (is (= expected (move-back player from-space board draw-pile discard-pile)))))))
 
 ;(deftest discard-card-test
 ;  (testing "Discarding a card adds it to the discard pile"
