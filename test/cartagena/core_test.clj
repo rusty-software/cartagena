@@ -153,30 +153,48 @@
         (is (nil? (occupied-space-index space-index board)))))))
 
 (deftest move-back-test
-  (testing "Can move back to the first space with one or two pirates"
-    (let [player {:name "tanya" :color :orange :cards [:hat :skull :knife]}
-          from-space {:icon :hat :pirates [:black :orange]}
-          board [{:icon :bottle :pirates [:orange]}
-                 {:icon :knife :pirates []}
-                 {:icon :bottle :pirates [:black]}
-                 {:icon :skull :pirates []}
-                 from-space
-                 {:icon :skull :pirates [:black]}]
-          draw-pile [:gun :key]
-          discard-pile [:knife]
-          updated-spaces [{:icon :bottle :pirates [:orange]}
-                          {:icon :knife :pirates []}
-                          {:icon :bottle :pirates [:black :orange]}
-                          {:icon :skull :pirates []}
-                          {:icon :hat :pirates [:black]}
-                          {:icon :skull :pirates [:black]}]
-          expected {:player (assoc player :cards [:hat :skull :knife :gun])
-                    :board-spaces updated-spaces
-                    :draw-pile [:key]
-                    :discard-pile [:knife]}]
-      (is (= expected (move-back player from-space board draw-pile discard-pile)))))
-  (testing "Skips over spaces with three pirates")
-  (testing "Does not allow moving back to jail"))
+  (let [player {:name "tanya" :color :orange :cards [:hat :skull :knife]}
+        board [{:icon :jail :pirates []}
+               {:icon :bottle :pirates [:orange]}
+               {:icon :knife :pirates []}
+               {:icon :bottle :pirates [:black]}
+               {:icon :skull :pirates []}
+               {:icon :hat :pirates [:black :orange]}
+               {:icon :skull :pirates [:black]}]
+        from-space {:icon :hat :pirates [:black :orange]}
+        draw-pile [:gun :key]
+        discard-pile [:knife]]
+    (testing "Can move back to the first space with one or two pirates"
+      (let [updated-spaces [{:icon :jail :pirates []}
+                            {:icon :bottle :pirates [:orange]}
+                            {:icon :knife :pirates []}
+                            {:icon :bottle :pirates [:black :orange]}
+                            {:icon :skull :pirates []}
+                            {:icon :hat :pirates [:black]}
+                            {:icon :skull :pirates [:black]}]
+            expected {:player (assoc player :cards [:hat :skull :knife :gun])
+                      :board-spaces updated-spaces
+                      :draw-pile [:key]
+                      :discard-pile [:knife]}]
+        (is (= expected (move-back player from-space board draw-pile discard-pile)))))
+    (testing "Skips over spaces with three pirates"
+      (let [board (assoc board 3 {:icon :bottle :pirates [:black :black :black]})
+            updated-spaces [{:icon :jail :pirates []}
+                            {:icon :bottle :pirates [:orange :orange]}
+                            {:icon :knife :pirates []}
+                            {:icon :bottle :pirates [:black :black :black]}
+                            {:icon :skull :pirates []}
+                            {:icon :hat :pirates [:black]}
+                            {:icon :skull :pirates [:black]}]
+            expected {:player (assoc player :cards [:hat :skull :knife :gun])
+                      :board-spaces updated-spaces
+                      :draw-pile [:key]
+                      :discard-pile [:knife]}]
+        (is (= expected (move-back player from-space board draw-pile discard-pile)))))
+    (testing "Does not allow moving back to jail"
+      (let [board (assoc board 3 {:icon :bottle :pirates [:black :black :black]}
+                               1 {:icon :bottle :pirates []})]
+        (is (nil? (move-back player from-space board draw-pile discard-pile)))))))
 
 ;(deftest discard-card-test
 ;  (testing "Discarding a card adds it to the discard pile"
