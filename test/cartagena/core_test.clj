@@ -210,22 +210,6 @@
                       :discard-pile [:knife]}]
         (is (= expected (move-back player from-space board draw-pile discard-pile)))))))
 
-;(deftest discard-card-test
-;  (testing "Discarding a card adds it to the discard pile"
-;    (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
-;    (discard! :key)
-;    (is (= 1 (count (:discard-pile @game-state))))
-;    (is (= :key (first (:discard-pile @game-state))))))
-
-;(deftest ^:single play-card-test
-;  (testing "Playing a card moves the selected pirate to first open space bearing the card's icon"
-;    (let [board-spaces [:bottle :gun :hat :key :knife :skull :bottle :gun :hat :key :knife :skull]
-;          player {:name "tanya" :color :orange :pirates [-1 -1 -1 -1 -1 -1] :cards [:hat :key :skull]}
-;          card :key
-;          pirate 0
-;          expected-player {:name "tanya" :color :orange :pirates [3 -1 -1 -1 -1 -1] :cards [:hat :skull]}
-;          updated-player (play-card player card pirate board-spaces)])))
-
 (deftest player-move-test
   (testing "Player can play card and move pieces")
   (testing "Player can move backward and receives cards")
