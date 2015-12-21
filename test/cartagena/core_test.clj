@@ -127,10 +127,30 @@
                           {:icon :bottle :pirates [:black]}
                           {:icon :skull :pirates [:orange]}
                           {:icon :skull :pirates [:black]}]
-          expected {:player {:cards [:hat :knife]}
+          expected {:player (assoc player :cards [:hat :knife])
                     :board-spaces updated-spaces
                     :discard-pile [:gun :key :skull]}]
       (is (= expected (play-card player icon from-space board discard-pile))))))
+
+(deftest occupied-space-index-test
+  (let [space-index 5
+        board [{:icon :bottle :pirates [:orange]}
+               {:icon :hat :pirates [:black]}
+               {:icon :knife :pirates []}
+               {:icon :bottle :pirates [:black]}
+               {:icon :skull :pirates []}
+               {:icon :skull :pirates [:black :orange]}
+               {:icon :ship :pirates []}]]
+    (testing "Given a starting index and board, finds the first occupied space prior to the starting index"
+      (is (= 3 (occupied-space-index space-index board))))
+    (testing "Spaces with three pirates are skipped"
+      (let [board (assoc board 3 {:icon :skull :pirates [:black :black :black]})]
+        (is (= 1 (occupied-space-index space-index board)))))
+    (testing "If no spaces are available, returns nil"
+      (let [board (assoc board 3 {:icon :skull :pirates []}
+                               1 {:icon :skull :pirates []}
+                               0 {:icon :skull :pirates []})]
+        (is (nil? (occupied-space-index space-index board)))))))
 
 (deftest move-back-test
   (testing "Can move back to the first space with one or two pirates"
@@ -143,16 +163,18 @@
                  from-space
                  {:icon :skull :pirates [:black]}]
           draw-pile [:gun :key]
+          discard-pile [:knife]
           updated-spaces [{:icon :bottle :pirates [:orange]}
                           {:icon :knife :pirates []}
                           {:icon :bottle :pirates [:black :orange]}
                           {:icon :skull :pirates []}
                           {:icon :hat :pirates [:black]}
                           {:icon :skull :pirates [:black]}]
-          expected {:player {:cards [:hat :skull :knife :gun]}
+          expected {:player (assoc player :cards [:hat :skull :knife :gun])
                     :board-spaces updated-spaces
-                    :draw-pile [:key]}]
-      (is (= expected (move-back player from-space board draw-pile)))))
+                    :draw-pile [:key]
+                    :discard-pile [:knife]}]
+      (is (= expected (move-back player from-space board draw-pile discard-pile)))))
   (testing "Skips over spaces with three pirates")
   (testing "Does not allow moving back to jail"))
 

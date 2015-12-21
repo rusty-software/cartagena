@@ -97,23 +97,54 @@
           (range (inc starting-index) (count board)))
     (dec (count board))))
 
+(defn remove-pirate-from-space
+  "Returns a space with the target pirate removed from the pirates collection"
+  [color space]
+  (let [[pre-pirates post-pirates] (split-with #(not= color %) (:pirates space))]
+    (assoc space :pirates (vec (flatten (concat pre-pirates (rest post-pirates)))))))
+
+(defn add-pirate-to-space
+  "Returns a space with the target pirate added to the pirates collection"
+  [color space]
+  (assoc space :pirates (conj (:pirates space) color)))
+
 (defn play-card
   "Discards the card and moves a single pirate from the space to the next available space."
   [player icon from-space board discard-pile]
   (let [[pre-cards post-cards] (split-with #(not= icon %) (:cards player))
-        [pre-pirates post-pirates] (split-with #(not= (:color player) %) (:pirates from-space))
+        updated-from-space (remove-pirate-from-space (:color player) from-space)
         space-index (.indexOf board from-space)
         next-open-space-index (open-space-index space-index board icon)
-        next-open-space (get board next-open-space-index)]
-    {:player {:cards (concat pre-cards (rest post-cards))}
-     :board-spaces (assoc board space-index (assoc from-space :pirates (vec (flatten (concat pre-pirates (rest post-pirates)))))
-                                next-open-space-index (assoc next-open-space :pirates (conj (:pirates next-open-space) (:color player))))
+        next-open-space (get board next-open-space-index)
+        updated-target-space (add-pirate-to-space (:color player) next-open-space)]
+    {:player (assoc player :cards (concat pre-cards (rest post-cards)))
+     :board-spaces (assoc board space-index updated-from-space
+                                next-open-space-index updated-target-space)
      :discard-pile (conj discard-pile icon)}))
+
+(defn occupied-space-index
+  "Returns the index of the first space with either one or two pirates before the starting index."
+  [starting-index board]
+  (some #(let [space (get board %)
+               pirate-count (count (:pirates space))]
+          (when (or (= 1 pirate-count) (= 2 pirate-count)) %))
+        (range (dec starting-index) 0 -1)))
 
 (defn move-back
   "Moves a single pirate back to the first available space."
-  [player from-space board draw-pile]
-  )
+  [player from-space board draw-pile discard-pile]
+  (when-let [prev-occupied-space-index (occupied-space-index (.indexOf board from-space) board)]
+    (let [from-space-index (.indexOf board from-space)
+          target-space (get board prev-occupied-space-index)
+          draw-count (count (:pirates target-space))
+          {:keys [player draw-pile discard-pile]} (draw-cards draw-count player draw-pile discard-pile)
+          updated-from-space (remove-pirate-from-space (:color player) from-space)
+          updated-target-space (add-pirate-to-space (:color player) target-space)]
+      {:player player
+       :board-spaces (assoc board from-space-index updated-from-space
+                                  prev-occupied-space-index updated-target-space)
+       :draw-pile draw-pile
+       :discard-pile discard-pile})))
 
 (defn update-player!
   "Updates the data for a single player by name"
