@@ -17,7 +17,7 @@
   "Generates a board from 6 random pieces"
   []
   (let [space-icons (-> (for [piece all-board-pieces]
-                          (if (= 0 (rand-int 2))
+                          (if (zero? (rand-int 2))
                             piece
                             (reverse piece)))
                         flatten
@@ -106,7 +106,7 @@
 (defn add-pirate-to-space
   "Returns a space with the target pirate added to the pirates collection"
   [color space]
-  (assoc space :pirates (conj (:pirates space) color)))
+  (update-in space [:pirates] conj color))
 
 (defn play-card
   "Discards the card and moves a single pirate from the space to the next available space."
