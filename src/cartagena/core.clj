@@ -146,6 +146,12 @@
        :draw-pile draw-pile
        :discard-pile discard-pile})))
 
+(defn game-over?
+  "Returns true if a player has 6 pirates on the ship; otherwise, false"
+  [board]
+  (let [ship (first (filter #(= :ship (:icon %)) board))]
+    false))
+
 (defn update-player!
   "Updates the data for a single player by name"
   [name kvs]

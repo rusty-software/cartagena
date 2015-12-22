@@ -210,12 +210,14 @@
                       :discard-pile [:knife]}]
         (is (= expected (move-back player from-space board draw-pile discard-pile)))))))
 
-(deftest player-move-test
-  (testing "Player can play card and move pieces")
-  (testing "Player can move backward and receives cards")
-  (testing "Player without cards must move backward")
-  (testing "Player with no available spaces behind cannot move backward")
-  (testing "Player with pirate on ship can move that pirate backward"))
-
 (deftest game-over-test
-  (testing "Game ends when a player has all pirates on the ship"))
+  (testing "Game ends when a player has all pirates on the ship"
+    (let [board [{:icon :jail :pirates []}
+                 {:icon :bottle :pirates [:orange]}
+                 {:icon :knife :pirates []}
+                 {:icon :bottle :pirates []}
+                 {:icon :skull :pirates []}
+                 {:icon :hat :pirates []}
+                 {:icon :ship :pirates [:black :black :black :black :black :black
+                                        :orange]}]])
+    (is (game-over? board))))
