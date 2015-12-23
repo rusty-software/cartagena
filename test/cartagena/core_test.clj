@@ -219,5 +219,15 @@
                  {:icon :skull :pirates []}
                  {:icon :hat :pirates []}
                  {:icon :ship :pirates [:black :black :black :black :black :black
-                                        :orange]}]])
-    (is (game-over? board))))
+                                        :orange]}]]
+      (is (game-over? board))))
+  (testing "Game is not over if no player has all pirates on the ship"
+    (let [board [{:icon :jail :pirates []}
+                 {:icon :bottle :pirates [:orange]}
+                 {:icon :knife :pirates []}
+                 {:icon :bottle :pirates [:black]}
+                 {:icon :skull :pirates []}
+                 {:icon :hat :pirates []}
+                 {:icon :ship :pirates [:black :black :black :black :black
+                                        :orange]}]]
+      (is (not (game-over? board))))))
