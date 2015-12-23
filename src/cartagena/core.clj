@@ -175,28 +175,35 @@
        default
        (str/lower-case input)))))
 
+
+(defn active-player
+  "Gets the active player from the players collection by name"
+  [game-state]
+  (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
+
 (defn prompt-play-card
   "Display card play options for current player, capture input, perform action"
-  []
-  (println "playing card!"))
+  [game-state]
+  (let [cards (:cards (active-player game-state))]
+    (println "Your cards are:" cards)
+    (println "Which card?")))
 
 (defn prompt-move-back
   "Display move options for current player, capture input, perform action"
-  []
+  [game-state]
   (println "moving!"))
 
 (defn prompt-action
   "Gets input for current player"
   [game-state]
-  (let [active-player (filter #(= (:current-player game-state) (:name %)) (:players game-state))]
-    (println "active player" active-player)
-    (println "You have" (:actions-left game-state) "actions left!  Choose! ([1] is default)")
-    (println "[1] Play card")
-    (println "[2] Move back")
-    (let [current-action (get-input "1")]
-      (if (= "1" current-action)
-        (prompt-play-card)
-        (prompt-move-back)))))
+  (println "active player" (active-player game-state))
+  (println "You have" (:actions-left game-state) "actions left!  Choose! ([1] is default)")
+  (println "[1] Play card")
+  (println "[2] Move back")
+  (let [current-action (get-input "1")]
+    (if (= "1" current-action)
+      (prompt-play-card game-state)
+      (prompt-move-back game-state))))
 
 (defn -main
   "Calls the function to get the number of players... goes on from there"
