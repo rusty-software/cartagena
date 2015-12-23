@@ -1,4 +1,6 @@
 (ns cartagena.core
+  (:require [clojure.string :as str]
+            [clojure.pprint :as pp])
   (:gen-class))
 
 (def game-state (atom {}))
@@ -74,7 +76,9 @@
                               (let [player-draw-pile (draw-cards 6 (first ps) cards [])]
                                 (recur (rest ps) (:draw-pile player-draw-pile) (conj acc player-draw-pile)))))
         init-players (vec (map :player players-draw-pile))
-        draw-pile (:draw-pile (last players-draw-pile))]
+        draw-pile (:draw-pile (last players-draw-pile))
+        pirates-in-jail (vec (flatten (map #(repeat 6 %) (map :color players))))
+        board (assoc board 0 {:icon :jail :pirates pirates-in-jail})]
     (reset! game-state {:board-spaces board
                         :players init-players
                         :player-order (vec (map :name init-players))
@@ -162,7 +166,22 @@
         updated-state (assoc @game-state :players updated-players)]
     (reset! game-state updated-state)))
 
+(defn get-input
+  "Waits for user to enter text and hit enter, then cleans the input"
+  ([] (get-input nil))
+  ([default]
+   (let [input (str/trim (read-line))]
+     (if (empty? input)
+       default
+       (str/lower-case input)))))
+
+(defn prompt-move
+  "Gets input for current player"
+  [game-state]
+  (pp/pprint game-state))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Calls the function to get the number of players... goes on from there"
   [& args]
-  (println "Hello, World!"))
+  (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
+  (prompt-move @game-state))

@@ -71,7 +71,8 @@
   (is (= 90 (count (:draw-pile @game-state))))
   (is (= 0 (count (:discard-pile @game-state)))))
 (defn assert-board-state []
-  (is (= 38 (count (:board-spaces @game-state)))))
+  (is (= 38 (count (:board-spaces @game-state))))
+  (is (= 12 (count (:pirates (first (:board-spaces @game-state))))) "Should have 12 pirates in jail"))
 
 (deftest new-game-test
   (testing "All game state is initialized correctly"
