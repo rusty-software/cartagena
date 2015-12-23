@@ -175,13 +175,31 @@
        default
        (str/lower-case input)))))
 
-(defn prompt-move
+(defn prompt-play-card
+  "Display card play options for current player, capture input, perform action"
+  []
+  (println "playing card!"))
+
+(defn prompt-move-back
+  "Display move options for current player, capture input, perform action"
+  []
+  (println "moving!"))
+
+(defn prompt-action
   "Gets input for current player"
   [game-state]
-  (pp/pprint game-state))
+  (let [active-player (filter #(= (:current-player game-state) (:name %)) (:players game-state))]
+    (println "active player" active-player)
+    (println "You have" (:actions-left game-state) "actions left!  Choose! ([1] is default)")
+    (println "[1] Play card")
+    (println "[2] Move back")
+    (let [current-action (get-input "1")]
+      (if (= "1" current-action)
+        (prompt-play-card)
+        (prompt-move-back)))))
 
 (defn -main
   "Calls the function to get the number of players... goes on from there"
   [& args]
   (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
-  (prompt-move @game-state))
+  (prompt-action @game-state))
