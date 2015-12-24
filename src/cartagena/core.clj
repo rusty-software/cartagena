@@ -1,9 +1,6 @@
 (ns cartagena.core
-  (:require [clojure.string :as str]
-            [clojure.pprint :as pp])
+  (:require [clojure.string :as str])
   (:gen-class))
-
-(def game-state (atom {}))
 
 (def board-piece1 [:bottle :gun :hat :skull :knife :key])
 (def board-piece2 [:knife :bottle :key :gun :hat :skull])
@@ -81,13 +78,13 @@
         draw-pile (:draw-pile (last players-draw-pile))
         pirates-in-jail (vec (flatten (map #(repeat 6 %) (map :color players))))
         board (assoc board 0 {:index 0 :icon :jail :pirates pirates-in-jail})]
-    (reset! game-state {:board board
-                        :players init-players
-                        :player-order (vec (map :name init-players))
-                        :current-player (:name (first init-players))
-                        :actions-remaining 3
-                        :draw-pile draw-pile
-                        :discard-pile []})))
+    {:board board
+     :players init-players
+     :player-order (vec (map :name init-players))
+     :current-player (:name (first init-players))
+     :actions-remaining 3
+     :draw-pile draw-pile
+     :discard-pile []}))
 
 (defn is-open-target?
   "Returns true if the space matches the icon and has fewer than three pirates"
@@ -160,12 +157,6 @@
         pirate-counts-by-color (frequencies (:pirates ship))]
     (some #(>= (second %) 6) pirate-counts-by-color)))
 
-(defn end-game
-  "Declares winner, etc."
-  [game-state]
-  (clojure.pprint/pprint game-state)
-  (println (format "Congratulations %s!  You have escaped Cartagena with your pirate band!" (:current-player game-state))))
-
 (defn next-player
   "Returns the player whose turn is... well, next"
   [game-state]
@@ -183,15 +174,6 @@
                         :actions-remaining 3)
       (assoc game-state :actions-remaining actions-remaining))))
 
-(defn get-input
-  "Waits for user to enter text and hit enter, then cleans the input"
-  ([] (get-input nil))
-  ([default]
-   (let [input (str/trim (read-line))]
-     (if (empty? input)
-       default
-       (str/lower-case input)))))
-
 (defn active-player
   "Gets the active player from the players collection by name"
   [game-state]
@@ -204,82 +186,5 @@
                  (when (some #{color} (:pirates space)) %))
                (range 0 (count board)))))
 
-;; TODO: refactor to only take: active-player board discard-pile
-;;  should return map of board discard-pile and updated-player
-;;  called should be responsible for updating game-state
-(defn prompt-play-card
-  "Display card play options for current player, capture input, perform action"
-  [game-state]
-  (let [player (active-player game-state)
-        cards (:cards player)
-        pirates (pirate-locations-for (:color player) (:board game-state))]
-    (println "Your cards are:" cards)
-    (println "Which card? " (first cards) "is default")
-    (let [card (keyword (str/replace (get-input (name (first cards))) #":" ""))]
-      (println "Your pirates are on:" pirates)
-      (println "Which pirate? " (first pirates) "is default")
-      (let [pirate-index (read-string (get-input (str (first pirates))))
-            from-space (get (:board game-state) pirate-index)
-            board (:board game-state)
-            discard-pile (:discard-pile game-state)
-            updated-state (play-card player card from-space board discard-pile)]
-        (assoc game-state :board (:board updated-state)
-                          :discard-pile (:discard-pile updated-state)
-                          :players (conj (remove #{player} (:players game-state)) (:player updated-state)))))))
-
-(defn prompt-move-back
-  "Display move options for current player, capture input, perform action"
-  [game-state]
-  (let [player (active-player game-state)
-        pirates (pirate-locations-for (:color player) (:board game-state))]
-    (println "Your pirates are on:" pirates)
-    (println "Which pirate? " (first pirates) "is default")
-    (let [pirate-index (read-string (get-input (str (first pirates))))
-          from-space (get (:board game-state) pirate-index)
-          board (:board game-state)
-          draw-pile (:draw-pile game-state)
-          discard-pile (:discard-pile game-state)
-          updated-state (move-back player from-space board draw-pile discard-pile)]
-      (assoc game-state :board (:board updated-state)
-                        :draw-pile (:draw-pile updated-state)
-                        :discard-pile (:discard-pile updated-state)
-                        :players (conj (remove #{player} (:players game-state)) (:player updated-state))))))
-
-(defn no-action
-  "Takes no active action; returns the game state as-is"
-  [game-state]
-  game-state)
-
-(declare prompt-action)
-
-(defn perform-action
-  "Acts out the selected action by gathering more input and calling appropriate functions"
-  [action-fn game-state]
-  (let [updated-game-state (action-fn game-state)]
-    (if (game-over? (:board updated-game-state))
-      (end-game updated-game-state)
-      (prompt-action (update-current-player updated-game-state)))))
-
-(defn display-board [game-state]
-  (clojure.pprint/pprint (:board game-state)))
-
-(defn prompt-action
-  "Gets input for current player"
-  [game-state]
-  (display-board game-state)
-  (println "active player" (active-player game-state))
-  (println "You have" (:actions-remaining game-state) "actions left!  Choose! ([1] is default)")
-  (println "[1] Play card")
-  (println "[2] Move back")
-  (println "[3] Pass")
-  (let [current-action (get-input "1")]
-    (case current-action
-      "1" (perform-action prompt-play-card game-state)
-      "2" (perform-action prompt-move-back game-state)
-      (perform-action no-action game-state))))
-
-(defn -main
-  "Calls the function to get the number of players... goes on from there"
-  [& args]
-  (new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
-  (prompt-action @game-state))
+(defn -main [& args]
+  (println "I don't do much..."))

@@ -8,4 +8,5 @@
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}}
   :test-selectors {:default (constantly true)
-                   :single :single})
+                   :single :single}
+  :aliases {"console-game" ["run" "-m" "cartagena.console/-main"]})
