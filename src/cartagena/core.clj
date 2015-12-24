@@ -24,9 +24,11 @@
                             (reverse piece)))
                         flatten
                         (conj :jail)
-                        (concat [:ship]))]
-    (vec (for [space-icon space-icons]
-           {:icon space-icon :pirates []}))))
+                        (concat [:ship])
+                        vec)]
+    (vec (for [index (range 0 38)
+               :let [space-icon (get space-icons index)]]
+           {:index index :icon space-icon :pirates []}))))
 
 (defn shuffle-cards
   "Shuffles and returns passed cards"
@@ -202,6 +204,9 @@
                  (when (some #{color} (:pirates space)) %))
                (range 0 (count board)))))
 
+;; TODO: refactor to only take: active-player board discard-pile
+;;  should return map of board discard-pile and updated-player
+;;  called should be responsible for updating game-state
 (defn prompt-play-card
   "Display card play options for current player, capture input, perform action"
   [game-state]
@@ -225,7 +230,20 @@
 (defn prompt-move-back
   "Display move options for current player, capture input, perform action"
   [game-state]
-  (println "moving!"))
+  (let [player (active-player game-state)
+        pirates (pirate-locations-for (:color player) (:board game-state))]
+    (println "Your pirates are on:" pirates)
+    (println "Which pirate? " (first pirates) "is default")
+    (let [pirate-index (read-string (get-input (str (first pirates))))
+          from-space (get (:board game-state) pirate-index)
+          board (:board game-state)
+          draw-pile (:draw-pile game-state)
+          discard-pile (:discard-pile game-state)
+          updated-state (move-back player from-space board draw-pile discard-pile)]
+      (assoc game-state :board (:board updated-state)
+                        :draw-pile (:draw-pile updated-state)
+                        :discard-pile (:discard-pile updated-state)
+                        :players (conj (remove #{player} (:players game-state)) (:player updated-state))))))
 
 (defn no-action
   "Takes no active action; returns the game state as-is"

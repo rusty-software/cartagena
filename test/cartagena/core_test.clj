@@ -4,8 +4,8 @@
 
 (deftest initialize-board-test
   (testing "Returns the right number of spaces as well as icons"
-    (let [expected-jail {:icon :jail :pirates []}
-          expected-ship {:icon :ship :pirates []}
+    (let [expected-jail {:index 0 :icon :jail :pirates []}
+          expected-ship {:index 37 :icon :ship :pirates []}
           board (initialize-board)
           actual-jail (first board)
           actual-ship (last board)
@@ -16,7 +16,8 @@
       (doseq [space player-spaces]
         (is (not (nil? (:pirates space))))
         (is (empty? (:pirates space)))
-        (is (some #{(:icon space)} icons)))
+        (is (some #{(:icon space)} icons))
+        (is (> (:index space) 0)))
       (doseq [icon icons]
         (is (= 6 (count (filter #(= icon (:icon %)) player-spaces)))))))
   ;; fragile test follows: it's possible that three draws in a row would be the same...
