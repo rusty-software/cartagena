@@ -80,7 +80,7 @@
         init-players (vec (map :player players-draw-pile))
         draw-pile (:draw-pile (last players-draw-pile))
         pirates-in-jail (vec (flatten (map #(repeat 6 %) (map :color players))))
-        board (assoc board 0 {:icon :jail :pirates pirates-in-jail})]
+        board (assoc board 0 {:index 0 :icon :jail :pirates pirates-in-jail})]
     (reset! game-state {:board board
                         :players init-players
                         :player-order (vec (map :name init-players))
