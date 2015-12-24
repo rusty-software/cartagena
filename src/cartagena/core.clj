@@ -83,6 +83,7 @@
                         :players init-players
                         :player-order (vec (map :name init-players))
                         :current-player (:name (first init-players))
+                        :actions-remaining 3
                         :draw-pile draw-pile
                         :discard-pile []})))
 
@@ -157,14 +158,11 @@
         pirate-counts-by-color (frequencies (:pirates ship))]
     (some #(>= (second %) 6) pirate-counts-by-color)))
 
-(defn update-player!
-  "Updates the data for a single player by name"
-  [name kvs]
-  (let [player (first (filter #(= name (:name %)) (:players @game-state)))
-        updated-player (merge player kvs)
-        updated-players (merge (remove #(= name (:name %)) (:players @game-state)) updated-player)
-        updated-state (assoc @game-state :players updated-players)]
-    (reset! game-state updated-state)))
+(defn end-game
+  "Declares winner, etc."
+  [game-state]
+  (clojure.pprint/pprint game-state)
+  (println (format "Congratulations %s!  You have escaped Cartagena with your pirate band!" (:current-player game-state))))
 
 (defn next-player
   "Returns the player whose turn is... well, next"
@@ -177,11 +175,11 @@
 (defn update-current-player
   "Decrements the moves remaining until the value reaches 0. Rotates the current player and resets the moves count at that point."
   [game-state]
-  (let [moves-remaining (dec (:moves-remaining game-state))]
-    (if (zero? moves-remaining)
+  (let [actions-remaining (dec (:actions-remaining game-state))]
+    (if (zero? actions-remaining)
       (assoc game-state :current-player (next-player game-state)
-                        :moves-remaining 3)
-      (assoc game-state :moves-remaining moves-remaining))))
+                        :actions-remaining 3)
+      (assoc game-state :actions-remaining actions-remaining))))
 
 (defn get-input
   "Waits for user to enter text and hit enter, then cleans the input"
@@ -220,28 +218,47 @@
             board (:board game-state)
             discard-pile (:discard-pile game-state)
             updated-state (play-card player card from-space board discard-pile)]
-        (doto
-          (assoc game-state :board (:board updated-state)
-                            :discard-pile (:discard-pile updated-state)
-                            :players (conj (remove #{player} (:players game-state)) (:player updated-state)))
-          (clojure.pprint/pprint))))))
+        (assoc game-state :board (:board updated-state)
+                          :discard-pile (:discard-pile updated-state)
+                          :players (conj (remove #{player} (:players game-state)) (:player updated-state)))))))
 
 (defn prompt-move-back
   "Display move options for current player, capture input, perform action"
   [game-state]
   (println "moving!"))
 
+(defn no-action
+  "Takes no active action; returns the game state as-is"
+  [game-state]
+  game-state)
+
+(declare prompt-action)
+
+(defn perform-action
+  "Acts out the selected action by gathering more input and calling appropriate functions"
+  [action-fn game-state]
+  (let [updated-game-state (action-fn game-state)]
+    (if (game-over? (:board updated-game-state))
+      (end-game updated-game-state)
+      (prompt-action (update-current-player updated-game-state)))))
+
+(defn display-board [game-state]
+  (clojure.pprint/pprint (:board game-state)))
+
 (defn prompt-action
   "Gets input for current player"
   [game-state]
+  (display-board game-state)
   (println "active player" (active-player game-state))
-  (println "You have" (:actions-left game-state) "actions left!  Choose! ([1] is default)")
+  (println "You have" (:actions-remaining game-state) "actions left!  Choose! ([1] is default)")
   (println "[1] Play card")
   (println "[2] Move back")
+  (println "[3] Pass")
   (let [current-action (get-input "1")]
-    (if (= "1" current-action)
-      (reset! game-state (prompt-play-card game-state))
-      (prompt-move-back game-state))))
+    (case current-action
+      "1" (perform-action prompt-play-card game-state)
+      "2" (perform-action prompt-move-back game-state)
+      (perform-action no-action game-state))))
 
 (defn -main
   "Calls the function to get the number of players... goes on from there"

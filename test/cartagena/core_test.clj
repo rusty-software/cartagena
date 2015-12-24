@@ -260,24 +260,24 @@
 (deftest update-current-player-test
   (testing "decrements moves remaining"
     (let [game-state {:current-player "tanya"
-                      :moves-remaining 3
+                      :actions-remaining 3
                       :player-order ["tanya" "rusty"]
                       :players [{:name "tanya" :color :orange :cards [:skull :knife]}
                                 {:name "rusty" :color :black :cards [:key :hat]}]}
           expected {:current-player "tanya"
-                    :moves-remaining 2
+                    :actions-remaining 2
                     :player-order ["tanya" "rusty"]
                     :players [{:name "tanya" :color :orange :cards [:skull :knife]}
                               {:name "rusty" :color :black :cards [:key :hat]}]}]
       (is (= expected (update-current-player game-state)))))
   (testing "rotates player and resets move count"
     (let [game-state {:current-player "tanya"
-                      :moves-remaining 1
+                      :actions-remaining 1
                       :player-order ["tanya" "rusty"]
                       :players [{:name "tanya" :color :orange :cards [:skull :knife]}
                                 {:name "rusty" :color :black :cards [:key :hat]}]}
           expected {:current-player "rusty"
-                    :moves-remaining 3
+                    :actions-remaining 3
                     :player-order ["tanya" "rusty"]
                     :players [{:name "tanya" :color :orange :cards [:skull :knife]}
                               {:name "rusty" :color :black :cards [:key :hat]}]}]

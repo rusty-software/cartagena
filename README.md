@@ -63,7 +63,7 @@ There are 30 pirates: 6 of each of 5 colors -- red, green, yellow, blue, brown. 
 
 ### How to play
 
-On your turn, you may make from 1 to 3 moves.  There are two types of moves.
+On your turn, you may take from 1 to 3 actions.  There are two types of actions.
 
 * _Advance a single pirate by playing a card from your hand._  Choose the card from your hand and put it in the discard pile.  Select a single pirate and advance that pirate to the first unoccupied space marked with the same icon represented by the card you just discarded.  If there is no unoccupied space with the corresponding icon ahead of your pirate, you may advance the pirate onto the ship.
 * _Move a single pirate backward to the first space occupied by only one or two pirates._  The space can be occupied by either your or other players' pirates.  Vacant spaces and spaces occupied by three pirates are skipped.  If you land on a space with a single pirate, draw one card; landing on a space with two pirates means you draw two cards.
