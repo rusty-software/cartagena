@@ -17,12 +17,12 @@
         (is (not (nil? (:pirates space))))
         (is (empty? (:pirates space)))
         (is (some #{(:icon space)} icons))
-        (is (> (:index space) 0)))
+        (is (pos? (:index space))))
       (doseq [icon icons]
         (is (= 6 (count (filter #(= icon (:icon %)) player-spaces)))))))
   ;; fragile test follows: it's possible that three draws in a row would be the same...
   (testing "Boards are not exactly alike"
-    (is (not (= (initialize-board) (initialize-board) (initialize-board))))))
+    (is (not= (initialize-board) (initialize-board)))))
 
 (deftest initialize-cards-test
   (testing "Returns a pile of 102 cards, 17 of each icon"
@@ -36,7 +36,7 @@
     (let [cards [:key :key :knife :knife :skull :skull :gun :gun :bottle :bottle :hat :hat]
           shuffled (shuffle-cards cards)]
       (is (= (count cards) (count shuffled)))
-      (is (not (= cards shuffled))))))
+      (is (not= cards shuffled)))))
 
 (deftest initialize-player-test
   (testing "Returns a player data structure full of initial state data"
@@ -64,27 +64,27 @@
         (is (filter #(= card %) (:cards player))))
       (is (= 2 (count (:draw-pile actual)))))))
 
-(defn assert-player-state []
-  (is (= 2 (count (:players @game-state))))
-  (is (= "tanya" (get-in @game-state [:players 0 :name]))))
-(defn assert-card-state []
-  (is (= 6 (count (get-in @game-state [:players 0 :cards]))))
-  (is (= 90 (count (:draw-pile @game-state))))
-  (is (= 0 (count (:discard-pile @game-state)))))
-(defn assert-board-state []
-  (is (= 38 (count (:board @game-state))))
-  (is (= 12 (count (:pirates (first (:board @game-state))))) "Should have 12 pirates in jail"))
+(defn assert-player-state [game-state]
+  (is (= 2 (count (:players game-state))))
+  (is (= "tanya" (get-in game-state [:players 0 :name]))))
+(defn assert-card-state [game-state]
+  (is (= 6 (count (get-in game-state [:players 0 :cards]))))
+  (is (= 90 (count (:draw-pile game-state))))
+  (is (zero? (count (:discard-pile game-state)))))
+(defn assert-board-state [game-state]
+  (is (= 38 (count (:board game-state))))
+  (is (= 12 (count (:pirates (first (:board game-state))))) "Should have 12 pirates in jail"))
 
 (deftest new-game-test
   (testing "All game state is initialized correctly"
-    (let [players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]]
-      (new-game! players)
+    (let [players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]
+          game-state (new-game! players)]
       (testing "Player state is correct"
-        (assert-player-state))
+        (assert-player-state game-state))
       (testing "Card state is correct"
-        (assert-card-state))
+        (assert-card-state game-state))
       (testing "Board state is correct"
-        (assert-board-state)))))
+        (assert-board-state game-state)))))
 
 (deftest is-open-target?-test
   (is (is-open-target? {:icon :hat :pirates [:orange :orange]} :hat))
