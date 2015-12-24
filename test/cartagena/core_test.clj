@@ -6,10 +6,10 @@
   (testing "Returns the right number of spaces as well as icons"
     (let [expected-jail {:icon :jail :pirates []}
           expected-ship {:icon :ship :pirates []}
-          board-spaces (initialize-board)
-          actual-jail (first board-spaces)
-          actual-ship (last board-spaces)
-          player-spaces (butlast (rest board-spaces))]
+          board (initialize-board)
+          actual-jail (first board)
+          actual-ship (last board)
+          player-spaces (butlast (rest board))]
       (is (= expected-jail actual-jail))
       (is (= expected-ship actual-ship))
       (is (= 36 (count player-spaces)))
@@ -71,8 +71,8 @@
   (is (= 90 (count (:draw-pile @game-state))))
   (is (= 0 (count (:discard-pile @game-state)))))
 (defn assert-board-state []
-  (is (= 38 (count (:board-spaces @game-state))))
-  (is (= 12 (count (:pirates (first (:board-spaces @game-state))))) "Should have 12 pirates in jail"))
+  (is (= 38 (count (:board @game-state))))
+  (is (= 12 (count (:pirates (first (:board @game-state))))) "Should have 12 pirates in jail"))
 
 (deftest new-game-test
   (testing "All game state is initialized correctly"
@@ -129,7 +129,7 @@
                           {:icon :skull :pirates [:orange]}
                           {:icon :skull :pirates [:black]}]
           expected {:player (assoc player :cards [:hat :knife])
-                    :board-spaces updated-spaces
+                    :board updated-spaces
                     :discard-pile [:gun :key :skull]}]
       (is (= expected (play-card player icon from-space board discard-pile))))))
 
@@ -174,7 +174,7 @@
                             {:icon :hat :pirates [:black]}
                             {:icon :skull :pirates [:black]}]
             expected {:player (assoc player :cards [:hat :skull :knife :gun])
-                      :board-spaces updated-spaces
+                      :board updated-spaces
                       :draw-pile [:key]
                       :discard-pile [:knife]}]
         (is (= expected (move-back player from-space board draw-pile discard-pile)))))
@@ -188,7 +188,7 @@
                             {:icon :hat :pirates [:black]}
                             {:icon :skull :pirates [:black]}]
             expected {:player (assoc player :cards [:hat :skull :knife :gun])
-                      :board-spaces updated-spaces
+                      :board updated-spaces
                       :draw-pile [:key]
                       :discard-pile [:knife]}]
         (is (= expected (move-back player from-space board draw-pile discard-pile)))))
@@ -206,7 +206,7 @@
                             {:icon :hat :pirates [:black]}
                             {:icon :skull :pirates [:black]}]
             expected {:player (assoc player :cards [:hat :skull :knife :gun :key])
-                      :board-spaces updated-spaces
+                      :board updated-spaces
                       :draw-pile []
                       :discard-pile [:knife]}]
         (is (= expected (move-back player from-space board draw-pile discard-pile)))))))
@@ -232,3 +232,21 @@
                  {:icon :ship :pirates [:black :black :black :black :black
                                         :orange]}]]
       (is (not (game-over? board))))))
+
+(deftest active-player-test
+  (let [game-state {:current-player "tanya"
+                    :players [{:name "tanya" :color :orange :cards [:skull :knife]}
+                              {:name "rusty" :color :black :cards [:key :hat]}]}
+        expected {:name "tanya" :color :orange :cards [:skull :knife]}]
+    (is (= expected (active-player game-state)))))
+
+(deftest pirate-locations-for-test
+  (let [board [{:icon :bottle :pirates [:orange]}
+               {:icon :hat :pirates [:black]}
+               {:icon :knife :pirates []}
+               {:icon :bottle :pirates [:black]}
+               {:icon :skull :pirates []}
+               {:icon :skull :pirates [:black :orange]}
+               {:icon :ship :pirates [:orange]}]
+        expected [0 5 6]]
+    (is (= expected (pirate-locations-for :orange board)))))

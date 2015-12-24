@@ -79,7 +79,7 @@
         draw-pile (:draw-pile (last players-draw-pile))
         pirates-in-jail (vec (flatten (map #(repeat 6 %) (map :color players))))
         board (assoc board 0 {:icon :jail :pirates pirates-in-jail})]
-    (reset! game-state {:board-spaces board
+    (reset! game-state {:board board
                         :players init-players
                         :player-order (vec (map :name init-players))
                         :current-player (:name (first init-players))
@@ -122,7 +122,7 @@
         next-open-space (get board next-open-space-index)
         updated-target-space (add-pirate-to-space (:color player) next-open-space)]
     {:player (assoc player :cards (concat pre-cards (rest post-cards)))
-     :board-spaces (assoc board space-index updated-from-space
+     :board (assoc board space-index updated-from-space
                                 next-open-space-index updated-target-space)
      :discard-pile (conj discard-pile icon)}))
 
@@ -145,7 +145,7 @@
           updated-from-space (remove-pirate-from-space (:color player) from-space)
           updated-target-space (add-pirate-to-space (:color player) target-space)]
       {:player player
-       :board-spaces (assoc board from-space-index updated-from-space
+       :board (assoc board from-space-index updated-from-space
                                   prev-occupied-space-index updated-target-space)
        :draw-pile draw-pile
        :discard-pile discard-pile})))
@@ -175,18 +175,39 @@
        default
        (str/lower-case input)))))
 
-
 (defn active-player
   "Gets the active player from the players collection by name"
   [game-state]
   (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
 
+(defn pirate-locations-for
+  "Given a color and board, returns a vector of indexes where the color appears"
+  [color board]
+  (vec (filter #(let [space (get board %)]
+                 (when (some #{color} (:pirates space)) %))
+               (range 0 (count board)))))
+
 (defn prompt-play-card
   "Display card play options for current player, capture input, perform action"
   [game-state]
-  (let [cards (:cards (active-player game-state))]
+  (let [player (active-player game-state)
+        cards (:cards player)
+        pirates (pirate-locations-for (:color player) (:board game-state))]
     (println "Your cards are:" cards)
-    (println "Which card?")))
+    (println "Which card? " (first cards) "is default")
+    (let [card (keyword (str/replace (get-input (name (first cards))) #":" ""))]
+      (println "Your pirates are on:" pirates)
+      (println "Which pirate? " (first pirates) "is default")
+      (let [pirate-index (read-string (get-input (str (first pirates))))
+            from-space (get (:board game-state) pirate-index)
+            board (:board game-state)
+            discard-pile (:discard-pile game-state)
+            updated-state (play-card player card from-space board discard-pile)]
+        (doto
+          (assoc game-state :board (:board updated-state)
+                            :discard-pile (:discard-pile updated-state)
+                            :players (conj (remove #{player} (:players game-state)) (:player updated-state)))
+          (clojure.pprint/pprint))))))
 
 (defn prompt-move-back
   "Display move options for current player, capture input, perform action"
