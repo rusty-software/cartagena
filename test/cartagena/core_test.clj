@@ -250,3 +250,35 @@
                {:icon :ship :pirates [:orange]}]
         expected [0 5 6]]
     (is (= expected (pirate-locations-for :orange board)))))
+
+(deftest next-player-test
+  (is (= "rusty" (next-player {:current-player "tanya"
+                               :player-order ["tanya" "rusty"]})))
+  (is (= "tanya" (next-player {:current-player "rusty"
+                               :player-order ["tanya" "rusty"]}))))
+
+(deftest update-current-player-test
+  (testing "decrements moves remaining"
+    (let [game-state {:current-player "tanya"
+                      :moves-remaining 3
+                      :player-order ["tanya" "rusty"]
+                      :players [{:name "tanya" :color :orange :cards [:skull :knife]}
+                                {:name "rusty" :color :black :cards [:key :hat]}]}
+          expected {:current-player "tanya"
+                    :moves-remaining 2
+                    :player-order ["tanya" "rusty"]
+                    :players [{:name "tanya" :color :orange :cards [:skull :knife]}
+                              {:name "rusty" :color :black :cards [:key :hat]}]}]
+      (is (= expected (update-current-player game-state)))))
+  (testing "rotates player and resets move count"
+    (let [game-state {:current-player "tanya"
+                      :moves-remaining 1
+                      :player-order ["tanya" "rusty"]
+                      :players [{:name "tanya" :color :orange :cards [:skull :knife]}
+                                {:name "rusty" :color :black :cards [:key :hat]}]}
+          expected {:current-player "rusty"
+                    :moves-remaining 3
+                    :player-order ["tanya" "rusty"]
+                    :players [{:name "tanya" :color :orange :cards [:skull :knife]}
+                              {:name "rusty" :color :black :cards [:key :hat]}]}]
+      (is (= expected (update-current-player game-state))))))

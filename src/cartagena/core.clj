@@ -166,6 +166,23 @@
         updated-state (assoc @game-state :players updated-players)]
     (reset! game-state updated-state)))
 
+(defn next-player
+  "Returns the player whose turn is... well, next"
+  [game-state]
+  (let [current-player-index (.indexOf (:player-order game-state) (:current-player game-state))]
+    (if (= current-player-index (dec (count (:player-order game-state))))
+      (get (:player-order game-state) 0)
+      (get (:player-order game-state) (inc current-player-index)))))
+
+(defn update-current-player
+  "Decrements the moves remaining until the value reaches 0. Rotates the current player and resets the moves count at that point."
+  [game-state]
+  (let [moves-remaining (dec (:moves-remaining game-state))]
+    (if (zero? moves-remaining)
+      (assoc game-state :current-player (next-player game-state)
+                        :moves-remaining 3)
+      (assoc game-state :moves-remaining moves-remaining))))
+
 (defn get-input
   "Waits for user to enter text and hit enter, then cleans the input"
   ([] (get-input nil))
@@ -223,7 +240,7 @@
   (println "[2] Move back")
   (let [current-action (get-input "1")]
     (if (= "1" current-action)
-      (prompt-play-card game-state)
+      (reset! game-state (prompt-play-card game-state))
       (prompt-move-back game-state))))
 
 (defn -main
