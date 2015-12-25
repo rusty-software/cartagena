@@ -253,10 +253,8 @@
     (is (= expected (pirate-locations-for :orange board)))))
 
 (deftest next-player-test
-  (is (= "rusty" (next-player {:current-player "tanya"
-                               :player-order ["tanya" "rusty"]})))
-  (is (= "tanya" (next-player {:current-player "rusty"
-                               :player-order ["tanya" "rusty"]}))))
+  (is (= "rusty" (next-player "tanya" ["tanya" "rusty"])))
+  (is (= "tanya" (next-player "rusty" ["tanya" "rusty"]))))
 
 (deftest update-current-player-test
   (testing "decrements moves remaining"

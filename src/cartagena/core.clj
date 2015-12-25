@@ -1,5 +1,4 @@
 (ns cartagena.core
-  (:require [clojure.string :as str])
   (:gen-class))
 
 (def board-piece1 [:bottle :gun :hat :skull :knife :key])
@@ -159,18 +158,19 @@
 
 (defn next-player
   "Returns the player whose turn is... well, next"
-  [game-state]
-  (let [current-player-index (.indexOf (:player-order game-state) (:current-player game-state))]
-    (if (= current-player-index (dec (count (:player-order game-state))))
-      (get (:player-order game-state) 0)
-      (get (:player-order game-state) (inc current-player-index)))))
+  [current-player player-order]
+  (let [current-player-index (.indexOf player-order current-player)]
+    (if (= current-player-index (dec (count player-order)))
+      (get player-order 0)
+      (get player-order (inc current-player-index)))))
 
 (defn update-current-player
   "Decrements the moves remaining until the value reaches 0. Rotates the current player and resets the moves count at that point."
   [game-state]
   (let [actions-remaining (dec (:actions-remaining game-state))]
     (if (zero? actions-remaining)
-      (assoc game-state :current-player (next-player game-state)
+      (assoc game-state :current-player (next-player (:current-player game-state)
+                                                     (:player-order game-state))
                         :actions-remaining 3)
       (assoc game-state :actions-remaining actions-remaining))))
 
