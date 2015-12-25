@@ -80,6 +80,7 @@
   "Gets input for current player"
   [game-state]
   (display-board game-state)
+  (println)
   (println "active player" (engine/active-player game-state))
   (println "You have" (:actions-remaining game-state) "actions left!  Choose! ([1] is default)")
   (println "[1] Play card")

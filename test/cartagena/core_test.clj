@@ -144,15 +144,15 @@
                {:icon :skull :pirates [:black :orange]}
                {:icon :ship :pirates []}]]
     (testing "Given a starting index and board, finds the first occupied space prior to the starting index"
-      (is (= 3 (occupied-space-index space-index board))))
+      (is (= 3 (occupiable-space-index space-index board))))
     (testing "Spaces with three pirates are skipped"
       (let [board (assoc board 3 {:icon :skull :pirates [:black :black :black]})]
-        (is (= 1 (occupied-space-index space-index board)))))
+        (is (= 1 (occupiable-space-index space-index board)))))
     (testing "If no spaces are available, returns nil"
       (let [board (assoc board 3 {:icon :skull :pirates []}
                                1 {:icon :skull :pirates []}
                                0 {:icon :skull :pirates []})]
-        (is (nil? (occupied-space-index space-index board)))))))
+        (is (nil? (occupiable-space-index space-index board)))))))
 
 (deftest move-back-test
   (let [player {:name "tanya" :color :orange :cards [:hat :skull :knife]}

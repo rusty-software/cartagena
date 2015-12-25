@@ -12,7 +12,7 @@
 (def icons [:bottle :gun :hat :key :knife :skull])
 
 (defn initialize-board
-  "Generates a board from 6 random pieces"
+  "Generates a board from 6 random pieces, adding a jail and ship to the beginning and end, respectively."
   []
   (let [space-icons (-> (for [piece all-board-pieces]
                           (if (zero? (rand-int 2))
@@ -32,7 +32,7 @@
   (shuffle cards))
 
 (defn initialize-cards
-  "Puts the full set of cards into the discard pile"
+  "Creates a collection of 17 of each icon, shuffles, and returns them."
   []
   (->> icons
        (map #(repeat 17 %))
@@ -63,7 +63,7 @@
      :discard-pile discard-pile}))
 
 (defn new-game!
-  "Initializes a new game"
+  "Initializes a new game by creating a board, setting up players with 6 cards and pirates in jail, replacing the draw pile, setting the player order and current player.  Returns a map of the game state."
   [players]
   (let [board (initialize-board)
         players-draw-pile (loop [ps (vec (map initialize-player players))
@@ -86,7 +86,7 @@
      :discard-pile []}))
 
 (defn is-open-target?
-  "Returns true if the space matches the icon and has fewer than three pirates"
+  "Returns true if the space matches the icon and has fewer than three pirates; otherwise false."
   [space icon]
   (and (= icon (:icon space))
        (< (count (:pirates space)) 3)))
@@ -101,18 +101,18 @@
     (dec (count board))))
 
 (defn remove-pirate-from-space
-  "Returns a space with the target pirate removed from the pirates collection"
+  "Returns a space with a single instand of the target pirate removed from the pirates collection."
   [color space]
   (let [[pre-pirates post-pirates] (split-with #(not= color %) (:pirates space))]
     (assoc space :pirates (vec (flatten (concat pre-pirates (rest post-pirates)))))))
 
 (defn add-pirate-to-space
-  "Returns a space with the target pirate added to the pirates collection"
+  "Returns a space with the target pirate added to the pirates collection."
   [color space]
   (update-in space [:pirates] conj color))
 
 (defn play-card
-  "Discards the card and moves a single pirate from the space to the next available space."
+  "Discards the card and moves a single pirate from the source space to the next available icon space.  Returns the updated player, board, and discard pile."
   [player icon from-space board discard-pile]
   (let [[pre-cards post-cards] (split-with #(not= icon %) (:cards player))
         updated-from-space (remove-pirate-from-space (:color player) from-space)
@@ -125,7 +125,7 @@
                                 next-open-space-index updated-target-space)
      :discard-pile (conj discard-pile icon)}))
 
-(defn occupied-space-index
+(defn occupiable-space-index
   "Returns the index of the first space with either one or two pirates before the starting index."
   [starting-index board]
   (some #(let [space (get board %)
@@ -134,30 +134,30 @@
         (range (dec starting-index) 0 -1)))
 
 (defn move-back
-  "Moves a single pirate back to the first available space."
+  "Moves a single pirate back to the first occupiable space.  Returns the updated player, board, draw, and discard piles."
   [player from-space board draw-pile discard-pile]
-  (when-let [prev-occupied-space-index (occupied-space-index (.indexOf board from-space) board)]
+  (when-let [prev-occupiable-space-index (occupiable-space-index (.indexOf board from-space) board)]
     (let [from-space-index (.indexOf board from-space)
-          target-space (get board prev-occupied-space-index)
+          target-space (get board prev-occupiable-space-index)
           draw-count (count (:pirates target-space))
           {:keys [player draw-pile discard-pile]} (draw-cards draw-count player draw-pile discard-pile)
           updated-from-space (remove-pirate-from-space (:color player) from-space)
           updated-target-space (add-pirate-to-space (:color player) target-space)]
       {:player player
        :board (assoc board from-space-index updated-from-space
-                                  prev-occupied-space-index updated-target-space)
+                                  prev-occupiable-space-index updated-target-space)
        :draw-pile draw-pile
        :discard-pile discard-pile})))
 
 (defn game-over?
-  "Returns true if a player has 6 pirates on the ship; otherwise, false"
+  "Returns truthy if a player has 6 pirates on the ship; otherwise nil."
   [board]
   (let [ship (first (filter #(= :ship (:icon %)) board))
         pirate-counts-by-color (frequencies (:pirates ship))]
     (some #(>= (second %) 6) pirate-counts-by-color)))
 
 (defn next-player
-  "Returns the player whose turn is... well, next"
+  "Returns the player string whose turn is... well, next."
   [current-player player-order]
   (let [current-player-index (.indexOf player-order current-player)]
     (if (= current-player-index (dec (count player-order)))
@@ -165,7 +165,7 @@
       (get player-order (inc current-player-index)))))
 
 (defn update-current-player
-  "Decrements the moves remaining until the value reaches 0. Rotates the current player and resets the moves count at that point."
+  "Decrements the moves remaining until the value reaches 0. Rotates the current player and resets the moves count at that point.  Returns the current player string and actions remaining count."
   [actions-remaining current-player player-order]
   (let [actions-remaining (dec actions-remaining)]
     (if (zero? actions-remaining)
@@ -175,12 +175,12 @@
        :actions-remaining actions-remaining})))
 
 (defn active-player
-  "Gets the active player from the players collection by name"
+  "Returns the active player from the players collection by name."
   [game-state]
   (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
 
 (defn pirate-locations-for
-  "Given a color and board, returns a vector of indexes where the color appears"
+  "Given a color and board, returns a vector of indexes where the color appears."
   [color board]
   (vec (filter #(let [space (get board %)]
                  (when (some #{color} (:pirates space)) %))
