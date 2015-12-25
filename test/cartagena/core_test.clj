@@ -258,26 +258,10 @@
 
 (deftest update-current-player-test
   (testing "decrements moves remaining"
-    (let [game-state {:current-player "tanya"
-                      :actions-remaining 3
-                      :player-order ["tanya" "rusty"]
-                      :players [{:name "tanya" :color :orange :cards [:skull :knife]}
-                                {:name "rusty" :color :black :cards [:key :hat]}]}
-          expected {:current-player "tanya"
-                    :actions-remaining 2
-                    :player-order ["tanya" "rusty"]
-                    :players [{:name "tanya" :color :orange :cards [:skull :knife]}
-                              {:name "rusty" :color :black :cards [:key :hat]}]}]
-      (is (= expected (update-current-player game-state)))))
+    (let [expected {:current-player "tanya"
+                    :actions-remaining 2}]
+      (is (= expected (update-current-player 3 "tanya" ["tanya" "rusty"])))))
   (testing "rotates player and resets move count"
-    (let [game-state {:current-player "tanya"
-                      :actions-remaining 1
-                      :player-order ["tanya" "rusty"]
-                      :players [{:name "tanya" :color :orange :cards [:skull :knife]}
-                                {:name "rusty" :color :black :cards [:key :hat]}]}
-          expected {:current-player "rusty"
-                    :actions-remaining 3
-                    :player-order ["tanya" "rusty"]
-                    :players [{:name "tanya" :color :orange :cards [:skull :knife]}
-                              {:name "rusty" :color :black :cards [:key :hat]}]}]
-      (is (= expected (update-current-player game-state))))))
+    (let [expected {:current-player "rusty"
+                    :actions-remaining 3}]
+      (is (= expected (update-current-player 1 "tanya" ["tanya" "rusty"]))))))

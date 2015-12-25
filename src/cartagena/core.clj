@@ -166,13 +166,13 @@
 
 (defn update-current-player
   "Decrements the moves remaining until the value reaches 0. Rotates the current player and resets the moves count at that point."
-  [game-state]
-  (let [actions-remaining (dec (:actions-remaining game-state))]
+  [actions-remaining current-player player-order]
+  (let [actions-remaining (dec actions-remaining)]
     (if (zero? actions-remaining)
-      (assoc game-state :current-player (next-player (:current-player game-state)
-                                                     (:player-order game-state))
-                        :actions-remaining 3)
-      (assoc game-state :actions-remaining actions-remaining))))
+      {:current-player (next-player current-player player-order)
+       :actions-remaining 3}
+      {:current-player current-player
+       :actions-remaining actions-remaining})))
 
 (defn active-player
   "Gets the active player from the players collection by name"

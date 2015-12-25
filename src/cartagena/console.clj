@@ -67,7 +67,11 @@
   (let [updated-game-state (action-fn game-state)]
     (if (engine/game-over? (:board updated-game-state))
       (end-game updated-game-state)
-      (prompt-action (engine/update-current-player updated-game-state)))))
+      (let [updated-player-state (engine/update-current-player (:actions-remaining updated-game-state)
+                                                               (:current-player updated-game-state)
+                                                               (:player-order updated-game-state))]
+        (prompt-action (assoc updated-game-state :actions-remaining (:actions-remaining updated-player-state)
+                                                 :current-player (:current-player updated-player-state)))))))
 
 (defn display-board [game-state]
   (clojure.pprint/pprint (:board game-state)))
