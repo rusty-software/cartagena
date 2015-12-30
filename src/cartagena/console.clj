@@ -93,6 +93,10 @@
       (perform-action no-action game-state))))
 
 (defn -main
-  "Calls the function to get the number of players... goes on from there"
+  "Calls the function to get the number of players... goes on from there
+
+  The list of players should be input as a single string containing the vector of player maps with name values escaped."
   [& args]
-  (prompt-action (engine/new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])))
+  (if args
+    (prompt-action (engine/new-game! (read-string (first args))))
+    (prompt-action (engine/new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}]))))
