@@ -50,10 +50,11 @@
           draw-pile (:draw-pile game-state)
           discard-pile (:discard-pile game-state)
           updated-state (engine/move-back player from-space board draw-pile discard-pile)]
-      (assoc game-state :board (:board updated-state)
-                        :draw-pile (:draw-pile updated-state)
-                        :discard-pile (:discard-pile updated-state)
-                        :players (conj (remove #{player} (:players game-state)) (:player updated-state))))))
+      (when updated-state
+        (assoc game-state :board (:board updated-state)
+                          :draw-pile (:draw-pile updated-state)
+                          :discard-pile (:discard-pile updated-state)
+                          :players (conj (remove #{player} (:players game-state)) (:player updated-state)))))))
 
 (defn no-action
   "Takes no active action; returns the game state as-is"
@@ -65,13 +66,17 @@
   "Acts out the selected action by gathering more input and calling appropriate functions"
   [action-fn game-state]
   (let [updated-game-state (action-fn game-state)]
-    (if (engine/game-over? (:board updated-game-state))
-      (end-game updated-game-state)
-      (let [updated-player-state (engine/update-current-player (:actions-remaining updated-game-state)
-                                                               (:current-player updated-game-state)
-                                                               (:player-order updated-game-state))]
-        (prompt-action (assoc updated-game-state :actions-remaining (:actions-remaining updated-player-state)
-                                                 :current-player (:current-player updated-player-state)))))))
+    (if (nil? updated-game-state)                           ;; nil indicates the action was invalid
+      (do
+        (println "Action was invalid!  Please try again.")
+        (prompt-action game-state))
+      (if (engine/game-over? (:board updated-game-state))
+        (end-game updated-game-state)
+        (let [updated-player-state (engine/update-current-player (:actions-remaining updated-game-state)
+                                                                 (:current-player updated-game-state)
+                                                                 (:player-order updated-game-state))]
+          (prompt-action (assoc updated-game-state :actions-remaining (:actions-remaining updated-player-state)
+                                                   :current-player (:current-player updated-player-state))))))))
 
 (defn display-board [game-state]
   (clojure.pprint/pprint (:board game-state)))
