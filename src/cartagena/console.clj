@@ -26,16 +26,17 @@
     (println "Your cards are:" cards)
     (println "Which card? " (first cards) "is default")
     (let [card (keyword (str/replace (get-input (name (first cards))) #":" ""))]
-      (println "Your pirates are on:" pirates)
-      (println "Which pirate? " (first pirates) "is default")
-      (let [pirate-index (read-string (get-input (str (first pirates))))
-            from-space (get (:board game-state) pirate-index)
-            board (:board game-state)
-            discard-pile (:discard-pile game-state)
-            updated-state (engine/play-card player card from-space board discard-pile)]
-        (assoc game-state :board (:board updated-state)
-                          :discard-pile (:discard-pile updated-state)
-                          :players (conj (remove #{player} (:players game-state)) (:player updated-state)))))))
+      (when (get (set engine/icons) card)
+        (println "Your pirates are on:" pirates)
+        (println "Which pirate? " (first pirates) "is default")
+        (let [pirate-index (read-string (get-input (str (first pirates))))
+              from-space (get (:board game-state) pirate-index)
+              board (:board game-state)
+              discard-pile (:discard-pile game-state)
+              updated-state (engine/play-card player card from-space board discard-pile)]
+          (assoc game-state :board (:board updated-state)
+                            :discard-pile (:discard-pile updated-state)
+                            :players (conj (remove #{player} (:players game-state)) (:player updated-state))))))))
 
 (defn prompt-move-back
   "Display move options for current player, capture input, perform action"
@@ -60,6 +61,7 @@
   "Takes no active action; returns the game state as-is"
   [game-state]
   game-state)
+
 (declare prompt-action)
 
 (defn perform-action
