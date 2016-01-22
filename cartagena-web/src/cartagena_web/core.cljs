@@ -7,17 +7,23 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:text "Hello world!"}))
+(defonce app-state (atom nil))
 
-(defn hello-world []
-  [:h1 (:text @app-state)])
+(defn main-view []
+  [:center
+   [:h1 "CARTAGENA"
+    [:div
+     [:svg
+      {:view-box "0 0 1000 800"
+       :width 1000
+       :height 800}
+      [:rect {:x 0 :y 0 :width 1000 :height 800 :stroke "black" :fill "none"}]]]]])
 
-(reagent/render-component [hello-world]
-                          (. js/document (getElementById "app")))
+(defn ^:export main []
+  (when-let [app (. js/document (getElementById "app"))]
+    (reagent/render-component [main-view] app)))
 
+(main)
 
 (defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+  (main))
