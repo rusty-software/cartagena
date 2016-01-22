@@ -14,10 +14,11 @@
    [:h1 "CARTAGENA"
     [:div
      [:svg
-      {:view-box "0 0 1000 800"
-       :width 1000
-       :height 800}
-      [:rect {:x 0 :y 0 :width 1000 :height 800 :stroke "black" :fill "none"}]]]]])
+      {:view-box "0 0 500 400"
+       :width "100%"
+       :height "100%"}
+      [:rect {:x 0 :y 0 :width "100%" :height "100%" :stroke "black" :stroke-width "1" :fill "tan"}]
+      [:rect {:x 5 :y 5 :width "80%" :height "65%" :stroke "black" :stroke-width "0.5" :fill "burlywood"}]]]]])
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
