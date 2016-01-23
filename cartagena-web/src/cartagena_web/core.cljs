@@ -9,24 +9,51 @@
 
 (defonce app-state (atom nil))
 
-(defn jail-img []
-  [:img {:src "img/jail.png" :width 30 :height 30 :left 0 :top 0}])
-
-(defn jail []
-  [:rect {:x 0 :y 0 :width 50 :height 90 :stroke "black" :fill "brown"}])
+(defn to-scale [n]
+  (* 1.5 n))
 
 (defn main-view []
   [:center
    [:h1 "CARTAGENA"
     [:div
      [:svg
-      {:view-box "0 0 800 600"
-       :width 800
-       :height 600}
-      [:rect {:x 0 :y 0 :width 800 :height 600 :stroke "black" :stroke-width "1" :fill "tan"}]
-      [:rect {:x 0 :y 0 :width 500 :height 400 :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
-      (jail)
-      (jail-img)]]]])
+      {:view-box "0 0 1000 800"
+       :width 1000
+       :height 800}
+      ;; play mat
+      [:rect {:x 0 :y 0 :width 1000 :height 800 :stroke "black" :stroke-width "1" :fill "tan"}]
+
+      ;; board
+      [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 400) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
+
+      ;; jail
+      [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
+      [:text {:x 0 :y (to-scale 15) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "jail"]
+
+      ;; space 1: bottle
+      [:rect {:x (to-scale 50) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
+      [:text {:x (to-scale 50) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "bottle"]
+
+      ;; space 2: gun
+      [:rect {:x (to-scale 90) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
+      [:text {:x (to-scale 90) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "gun"]
+
+      ;; space 3: hat
+      [:rect {:x (to-scale 130) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
+      [:text {:x (to-scale 130) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "hat"]
+
+      ;; space 4: key
+      [:rect {:x (to-scale 170) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
+      [:text {:x (to-scale 170) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "key"]
+
+      ;; space 5: knife
+      [:rect {:x (to-scale 210) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
+      [:text {:x (to-scale 210) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "knife"]
+
+      ;; space 6: skull
+      [:rect {:x (to-scale 250) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
+      [:text {:x (to-scale 250) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "skull"]
+      ]]]])
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
