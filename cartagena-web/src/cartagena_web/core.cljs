@@ -1,4 +1,4 @@
-(ns cartagena-web.core
+(ns ^:figwheel-always cartagena-web.core
   (:require [reagent.core :as reagent :refer [atom]]))
 
 (enable-console-print!)
@@ -9,16 +9,20 @@
 
 (defonce app-state (atom nil))
 
+(defn jail []
+  [:rect {:x 0 :y 0 :width 50 :height 90 :stroke "black" :fill "brown"}])
+
 (defn main-view []
   [:center
    [:h1 "CARTAGENA"
     [:div
      [:svg
-      {:view-box "0 0 500 400"
-       :width "100%"
-       :height "100%"}
-      [:rect {:x 0 :y 0 :width "100%" :height "100%" :stroke "black" :stroke-width "1" :fill "tan"}]
-      [:rect {:x 5 :y 5 :width "80%" :height "65%" :stroke "black" :stroke-width "0.5" :fill "burlywood"}]]]]])
+      {:view-box "0 0 800 600"
+       :width 800
+       :height 600}
+      [:rect {:x 0 :y 0 :width 800 :height 600 :stroke "black" :stroke-width "1" :fill "tan"}]
+      [:rect {:x 0 :y 0 :width 500 :height 400 :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
+      (jail)]]]])
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
