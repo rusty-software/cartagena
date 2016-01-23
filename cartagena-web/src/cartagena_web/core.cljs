@@ -1,5 +1,6 @@
 (ns ^:figwheel-always cartagena-web.core
-  (:require [reagent.core :as reagent :refer [atom]]))
+  (:require [reagent.core :as reagent :refer [atom]]
+            [ajax.core :as ajax]))
 
 (enable-console-print!)
 
@@ -11,6 +12,10 @@
 
 (defn to-scale [n]
   (* 1.5 n))
+
+(defn jail! []
+  (when-let [jail (get-in @app-state [:board 0])]
+    (println "The jail space contains:" jail)))
 
 (defn main-view []
   [:center
@@ -27,6 +32,7 @@
       [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 400) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
 
       ;; jail
+      (jail!)
       [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
       [:text {:x 0 :y (to-scale 15) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "jail"]
 
@@ -78,8 +84,20 @@
       [:text {:x (to-scale 250) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "skull"]
       ]]]])
 
+(defn on-error [{:keys [status status-text]}]
+  (.log js/console (str "ERROR [" status "] " status-text)))
+
+(defn on-new-game [response]
+  (reset! app-state response))
+
+(defn new-game! []
+  (ajax/GET "http://localhost:3000/fake-game"
+            {:handler on-new-game
+             :error-handler on-error}))
+
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
+    (new-game!)
     (reagent/render-component [main-view] app)))
 
 (main)
