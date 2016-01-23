@@ -9,6 +9,7 @@
                  [ring/ring-defaults "0.1.5"]
                  [ring/ring-json "0.4.0"]
                  [ring-cors "0.1.7"]
+                 [ring-transit "0.1.4"]
                  [compojure "1.4.0"]
                  [camel-snake-kebab "0.3.2"]]
   :target-path "target/%s"
