@@ -46,37 +46,59 @@
                    (let [y (to-scale (+ 35 (* 10 pirate-index)))]
                      [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
 
+(def piece-positions
+  [
+   ;; jail
+   {:x 0 :y 0 :text-x 0 :text-y 15}
+   ;; row 1, left to right
+   {:x 50 :y 60 :text-x 50 :text-y 75}
+   {:x 90 :y 60 :text-x 90 :text-y 75}
+   {:x 130 :y 60 :text-x 130 :text-y 75}
+   {:x 170 :y 60 :text-x 170 :text-y 75}
+   {:x 210 :y 60 :text-x 210 :text-y 75}
+   {:x 250 :y 60 :text-x 250 :text-y 75}
+   {:x 290 :y 60 :text-x 290 :text-y 75}
+   {:x 330 :y 60 :text-x 330 :text-y 75}
+   {:x 370 :y 60 :text-x 370 :text-y 75}
+   {:x 410 :y 60 :text-x 410 :text-y 75}
+   {:x 450 :y 60 :text-x 450 :text-y 75}
+   ;; transition 1
+   {:x 450 :y 90 :text-x 450 :text-y 105}
+   ;; row 2, right to left
+   {:x 450 :y 120 :text-x 450 :text-y 135}
+   {:x 410 :y 120 :text-x 410 :text-y 135}
+   {:x 370 :y 120 :text-x 370 :text-y 135}
+   {:x 330 :y 120 :text-x 330 :text-y 135}
+   {:x 290 :y 120 :text-x 290 :text-y 135}
+   {:x 250 :y 120 :text-x 250 :text-y 135}
+   {:x 210 :y 120 :text-x 210 :text-y 135}
+   {:x 170 :y 120 :text-x 170 :text-y 135}
+   {:x 130 :y 120 :text-x 130 :text-y 135}
+   {:x 90 :y 120 :text-x 90 :text-y 135}
+   {:x 50 :y 120 :text-x 50 :text-y 135}
+   ])
+
+(defn normal-space [x y]
+  [:rect {:x (to-scale x) :y (to-scale y) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}])
+
+(defn space-text [x y s]
+  [:text {:x (to-scale x) :y (to-scale y) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} s])
+
+(defn normal-spaces []
+  (apply concat
+         (for [i (range 1 24)]
+           (when-let [space-data (get-in @app-state [:board i])]
+             (let [position (get piece-positions i)
+                   space (normal-space (:x position) (:y position))
+                   text (space-text (:text-x position) (:text-y position) (name (:icon space-data)))]
+               [space text]
+               )))))
+
 (def rest-of-board
   [:svg
       {:view-box "0 0 1000 750"
        :width 1000
        :height 750}
-
-      ;; players in jail
-      (when-let [jail (get-in @app-state [:board 0])]
-        (let [pirate-frequencies (frequencies (:pirates jail))
-              pirate-colors (vec (keys pirate-frequencies))]
-          (for [player-index (range (count pirate-frequencies))]
-            (let [pirate-color (get pirate-colors player-index)
-                  pirate-count (pirate-color pirate-frequencies)
-                  color-name (name pirate-color)
-                  x (to-scale (+ 5 (* 10 player-index)))]
-              (for [pirate-index (range pirate-count)]
-                (let [y (to-scale (+ 35 (* 10 pirate-index)))]
-                  [:cirlce {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))
-      ;[:circle {:cx (to-scale 5) :cy (to-scale 35) :r (to-scale 4) :fill "orange"}]
-      ;[:circle {:cx (to-scale 5) :cy (to-scale 45) :r (to-scale 4) :fill "orange"}]
-      ;[:circle {:cx (to-scale 15) :cy (to-scale 35) :r (to-scale 4) :fill "green"}]
-      ;[:circle {:cx (to-scale 15) :cy (to-scale 45) :r (to-scale 4) :fill "green"}]
-      ;[:circle {:cx (to-scale 15) :cy (to-scale 55) :r (to-scale 4) :fill "green"}]
-      ;[:circle {:cx (to-scale 15) :cy (to-scale 65) :r (to-scale 4) :fill "green"}]
-      ;[:circle {:cx (to-scale 15) :cy (to-scale 75) :r (to-scale 4) :fill "green"}]
-      ;[:circle {:cx (to-scale 15) :cy (to-scale 85) :r (to-scale 4) :fill "green"}]
-      ;[:circle {:cx (to-scale 25) :cy (to-scale 35) :r (to-scale 4) :fill "blue"}]
-      ;[:circle {:cx (to-scale 25) :cy (to-scale 45) :r (to-scale 4) :fill "blue"}]
-      ;[:circle {:cx (to-scale 25) :cy (to-scale 55) :r (to-scale 4) :fill "blue"}]
-      ;[:circle {:cx (to-scale 25) :cy (to-scale 65) :r (to-scale 4) :fill "blue"}]
-
 
       ;; space 1: bottle
       [:rect {:x (to-scale 50) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
@@ -121,6 +143,7 @@
            :height 750}]
          (into (static-board))
          (into (jail))
+         (into (normal-spaces))
          )]]])
 
 (defn on-error [{:keys [status status-text]}]
