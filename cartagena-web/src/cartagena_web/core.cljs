@@ -10,18 +10,14 @@
   (* 1.5 n))
 
 (defn static-board []
-  [;; playmat
-   [:rect {:x 0 :y 0 :width (to-scale 800) :height (to-scale 600) :stroke "black" :stroke-width "1" :fill "tan"}]
-   ;; board
-   [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 400) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
+  [;; board
+   [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 300) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
    ;; jail
    [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
    [:text {:x 0 :y (to-scale 15) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "jail"]
    ;; ship
    [:rect {:x (to-scale 400) :y (to-scale 240) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
    [:text {:x (to-scale 400) :y (to-scale 255) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "ship"]
-   ;; player area
-   [:rect {:x (to-scale 600) :y 0 :width (to-scale 150) :height (to-scale 200) :stroke "black" :stroke-width "1" :fill "wheat"}]
    ])
 
 
@@ -124,15 +120,19 @@
   [:center
    [:h1 "CARTAGENA"
     [:div
-     (-> [:svg
-          {:view-box (str "0 0" (to-scale 801) (to-scale 601))
-           :width (to-scale 801)
-           :height (to-scale 601)}]
-         (into (static-board))
-         (into (jail))
-         (into (normal-spaces))
-         (into (ship))
-         )]]])
+     [:div
+      (-> [:svg
+           {:view-box (str "0 0" (to-scale 501) (to-scale 301))
+            :width (to-scale 501)
+            :height (to-scale 301)}]
+          (into (static-board))
+          (into (jail))
+          (into (normal-spaces))
+          (into (ship))
+          )]
+     [:div
+      [:label "player area"]]]
+    ]])
 
 (defn on-error [{:keys [status status-text]}]
   (.log js/console (str "ERROR [" status "] " status-text)))
