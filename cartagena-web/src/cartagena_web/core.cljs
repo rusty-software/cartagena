@@ -11,7 +11,7 @@
 
 (defn static-board []
   [;; playmat
-   [:rect {:x 0 :y 0 :width 1000 :height 750 :stroke "black" :stroke-width "1" :fill "tan"}]
+   [:rect {:x 0 :y 0 :width (to-scale 800) :height (to-scale 600) :stroke "black" :stroke-width "1" :fill "tan"}]
    ;; board
    [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 400) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
    ;; jail
@@ -20,13 +20,8 @@
    ;; ship
    [:rect {:x (to-scale 400) :y (to-scale 240) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
    [:text {:x (to-scale 400) :y (to-scale 255) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "ship"]
-
-   ;[:circle {:cx (to-scale 445) :cy (to-scale 245) :r (to-scale 4) :fill "chartreuse"}]
-   ;[:circle {:cx (to-scale 445) :cy (to-scale 285) :r (to-scale 4) :fill "chartreuse"}]
-   ;[:circle {:cx (to-scale 445) :cy (to-scale 245) :r (to-scale 4) :fill "cyan"}]
-   ;[:circle {:cx (to-scale 465) :cy (to-scale 245) :r (to-scale 4) :fill "yellow"}]
-   ;[:circle {:cx (to-scale 475) :cy (to-scale 245) :r (to-scale 4) :fill "fuchsia"}]
-   ;[:circle {:cx (to-scale 485) :cy (to-scale 245) :r (to-scale 4) :fill "red"}]
+   ;; player area
+   [:rect {:x (to-scale 600) :y 0 :width (to-scale 150) :height (to-scale 200) :stroke "black" :stroke-width "1" :fill "wheat"}]
    ])
 
 
@@ -125,56 +120,18 @@
                [space text]
                )))))
 
-(def rest-of-board
-  [:svg
-      {:view-box "0 0 1000 750"
-       :width 1000
-       :height 750}
-
-      ;; space 1: bottle
-      [:rect {:x (to-scale 50) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
-      [:text {:x (to-scale 50) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "bottle"]
-
-
-      ;; space 2: gun
-      [:rect {:x (to-scale 90) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
-      [:text {:x (to-scale 90) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "gun"]
-      [:circle {:cx (to-scale 85) :cy (to-scale 65) :r (to-scale 4) :fill "orange"}]
-      [:circle {:cx (to-scale 85) :cy (to-scale 75) :r (to-scale 4) :fill "black"}]
-
-      ;; space 3: hat
-      [:rect {:x (to-scale 130) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
-      [:text {:x (to-scale 130) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "hat"]
-      [:circle {:cx (to-scale 125) :cy (to-scale 65) :r (to-scale 4) :fill "orange"}]
-
-      ;; space 4: key
-      [:rect {:x (to-scale 170) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
-      [:text {:x (to-scale 170) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "key"]
-      [:circle {:cx (to-scale 165) :cy (to-scale 65) :r (to-scale 4) :fill "orange"}]
-      [:circle {:cx (to-scale 165) :cy (to-scale 75) :r (to-scale 4) :fill "orange"}]
-      [:circle {:cx (to-scale 165) :cy (to-scale 85) :r (to-scale 4) :fill "black"}]
-
-
-      ;; space 5: knife
-      [:rect {:x (to-scale 210) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
-      [:text {:x (to-scale 210) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "knife"]
-
-      ;; space 6: skull
-      [:rect {:x (to-scale 250) :y (to-scale 60) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}]
-      [:text {:x (to-scale 250) :y (to-scale 75) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} "skull"]
-      ])
-
 (defn main-view []
   [:center
    [:h1 "CARTAGENA"
     [:div
      (-> [:svg
-          {:view-box "0 0 1000 750"
-           :width 1000
-           :height 750}]
+          {:view-box (str "0 0" (to-scale 801) (to-scale 601))
+           :width (to-scale 801)
+           :height (to-scale 601)}]
          (into (static-board))
          (into (jail))
          (into (normal-spaces))
+         (into (ship))
          )]]])
 
 (defn on-error [{:keys [status status-text]}]
