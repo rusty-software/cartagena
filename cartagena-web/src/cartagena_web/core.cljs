@@ -18,33 +18,18 @@
    [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
    [:text {:x 0 :y (to-scale 15) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "jail"]
    ;; ship
-   [:rect {:x (to-scale 410) :y (to-scale 250) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
-   [:text {:x (to-scale 410) :y (to-scale 260) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "ship"]
+   [:rect {:x (to-scale 400) :y (to-scale 240) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
+   [:text {:x (to-scale 400) :y (to-scale 255) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "ship"]
 
-   [:circle {:cx (to-scale 455) :cy (to-scale 255) :r (to-scale 4) :fill "chartreuse"}]
-   [:circle {:cx (to-scale 455) :cy (to-scale 295) :r (to-scale 4) :fill "chartreuse"}]
-   [:circle {:cx (to-scale 465) :cy (to-scale 255) :r (to-scale 4) :fill "cyan"}]
-   [:circle {:cx (to-scale 475) :cy (to-scale 255) :r (to-scale 4) :fill "yellow"}]
-   [:circle {:cx (to-scale 485) :cy (to-scale 255) :r (to-scale 4) :fill "fuchsia"}]
-   [:circle {:cx (to-scale 495) :cy (to-scale 255) :r (to-scale 4) :fill "red"}]
+   ;[:circle {:cx (to-scale 445) :cy (to-scale 245) :r (to-scale 4) :fill "chartreuse"}]
+   ;[:circle {:cx (to-scale 445) :cy (to-scale 285) :r (to-scale 4) :fill "chartreuse"}]
+   ;[:circle {:cx (to-scale 445) :cy (to-scale 245) :r (to-scale 4) :fill "cyan"}]
+   ;[:circle {:cx (to-scale 465) :cy (to-scale 245) :r (to-scale 4) :fill "yellow"}]
+   ;[:circle {:cx (to-scale 475) :cy (to-scale 245) :r (to-scale 4) :fill "fuchsia"}]
+   ;[:circle {:cx (to-scale 485) :cy (to-scale 245) :r (to-scale 4) :fill "red"}]
    ])
 
-(def good-example (into [:svg {:w 10 :h 8}]
-                        [[:circle {:x 1 :y 2}] [:circle {:x 2 :y 4}]]))
 
-(defn jail []
-  (when-let [jail (get-in @app-state [:board 0])]
-    (apply concat
-           (let [pirate-frequencies (frequencies (:pirates jail))
-                 pirate-colors (vec (keys pirate-frequencies))]
-             (for [player-index (range (count pirate-frequencies))]
-               (let [pirate-color (get pirate-colors player-index)
-                     pirate-count (pirate-color pirate-frequencies)
-                     color-name (name pirate-color)
-                     x (to-scale (+ 5 (* 10 player-index)))]
-                 (for [pirate-index (range pirate-count)]
-                   (let [y (to-scale (+ 35 (* 10 pirate-index)))]
-                     [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
 
 (def piece-positions
   [
@@ -76,7 +61,53 @@
    {:x 130 :y 120 :text-x 130 :text-y 135}
    {:x 90 :y 120 :text-x 90 :text-y 135}
    {:x 50 :y 120 :text-x 50 :text-y 135}
-   ])
+   ;; transition 2
+   {:x 50 :y 150 :text-x 50 :text-y 165}
+   ;; row 3, left to right
+   {:x 50 :y 180 :text-x 50 :text-y 195}
+   {:x 90 :y 180 :text-x 90 :text-y 195}
+   {:x 130 :y 180 :text-x 130 :text-y 195}
+   {:x 170 :y 180 :text-x 170 :text-y 195}
+   {:x 210 :y 180 :text-x 210 :text-y 195}
+   {:x 250 :y 180 :text-x 250 :text-y 195}
+   {:x 290 :y 180 :text-x 290 :text-y 195}
+   {:x 330 :y 180 :text-x 330 :text-y 195}
+   {:x 370 :y 180 :text-x 370 :text-y 195}
+   {:x 410 :y 180 :text-x 410 :text-y 195}
+   {:x 450 :y 180 :text-x 450 :text-y 195}
+   ;; transition 3
+   {:x 450 :y 210 :text-x 450 :text-y 225}
+   ;; ship
+   {:x 400 :y 240 :text-x 400 :text-y 415}
+ ])
+
+(defn jail []
+  (when-let [jail (get-in @app-state [:board 0])]
+    (apply concat
+           (let [pirate-frequencies (frequencies (:pirates jail))
+                 pirate-colors (vec (keys pirate-frequencies))]
+             (for [player-index (range (count pirate-frequencies))]
+               (let [pirate-color (get pirate-colors player-index)
+                     pirate-count (pirate-color pirate-frequencies)
+                     color-name (name pirate-color)
+                     x (to-scale (+ 5 (* 10 player-index)))]
+                 (for [pirate-index (range pirate-count)]
+                   (let [y (to-scale (+ 35 (* 10 pirate-index)))]
+                     [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
+
+(defn ship []
+  (when-let [ship (get-in @app-state [:board 37])]
+    (apply concat
+           (let [pirate-frequencies (frequencies (:pirates ship))
+                 pirate-colors (vec (keys pirate-frequencies))]
+             (for [player-index (range (count pirate-frequencies))]
+               (let [pirate-color (get pirate-colors player-index)
+                     pirate-count (pirate-color pirate-frequencies)
+                     color-name (name pirate-color)
+                     x (to-scale (+ 445 (* 10 player-index)))]
+                 (for [pirate-index (range pirate-count)]
+                   (let [y (to-scale (+ 245 (* 10 pirate-index)))]
+                     [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
 
 (defn normal-space [x y]
   [:rect {:x (to-scale x) :y (to-scale y) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}])
@@ -86,7 +117,7 @@
 
 (defn normal-spaces []
   (apply concat
-         (for [i (range 1 24)]
+         (for [i (range 1 37)]
            (when-let [space-data (get-in @app-state [:board i])]
              (let [position (get piece-positions i)
                    space (normal-space (:x position) (:y position))
