@@ -21,9 +21,9 @@
               [{:id "dev"
                 :source-paths ["src"]
 
-                :figwheel {:on-jsload "cartagena-web.core/on-js-reload"}
+                :figwheel {:on-jsload "cartagena-web.main/on-js-reload"}
 
-                :compiler {:main cartagena-web.core
+                :compiler {:main cartagena-web.main
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/cartagena_web.js"
                            :output-dir "resources/public/js/compiled/out"
@@ -34,7 +34,7 @@
                {:id "min"
                 :source-paths ["src"]
                 :compiler {:output-to "resources/public/js/compiled/cartagena_web.js"
-                           :main cartagena-web.core
+                           :main cartagena-web.main
                            :optimizations :advanced
                            :pretty-print false}}]}
 
