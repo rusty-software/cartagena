@@ -65,6 +65,7 @@
 (defn new-game!
   "Initializes a new game by creating a board, setting up players with 6 cards and pirates in jail, replacing the draw pile, setting the player order and current player.  Returns a map of the game state."
   [players]
+  (println "new-game! called")
   (let [board (initialize-board)
         players-draw-pile (loop [ps (vec (map initialize-player players))
                                  cards (initialize-cards)

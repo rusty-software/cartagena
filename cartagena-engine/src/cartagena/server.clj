@@ -3,7 +3,6 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.middleware.cors :as cors]
-    [ring.middleware.defaults :as defaults]
     [ring.middleware.transit :as trans]
     [ring.util.response :as response]
     [cartagena.core :as engine]))
@@ -21,7 +20,7 @@
            (route/not-found "<h1>Page not found</h1>"))
 
 (def app
-  (-> app-routes #_(defaults/wrap-defaults app-routes defaults/api-defaults)
+  (-> app-routes
       (cors/wrap-cors :access-control-allow-origin [#"http://localhost:3449"]
                       :access-control-allow-methods [:get :put :post :delete])
       (trans/wrap-transit-response {:encoding :json :keywords? true :opts {}})
