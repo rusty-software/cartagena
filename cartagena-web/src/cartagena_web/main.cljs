@@ -142,23 +142,30 @@
                          :discard-pile []}
   )
 
-(defonce app-state (atom nil))
+(defonce app-state (atom initial-game-state))
 
 (defn to-scale [n]
-  (* 1.5 n))
+  (* 1.8 n))
+
+(def icon-images {:jail "img/jail.png"
+                  :ship "img/ship.png"
+                  :bottle "img/bottle.png"
+                  :gun "img/gun.jpg"
+                  :hat "img/hat.png"
+                  :key "img/key.png"
+                  :knife "img/knife.png"
+                  :skull "img/skull.png"})
 
 (defn static-board []
   [;; board
    [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 300) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
    ;; jail
    [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
-   [:g {:dangerouslySetInnerHTML {:__html "<image xlink:href=\"img/jail.png\" x=0 y=0 height=\"50px\" width=\"50px\" />"}}]
+   [:g {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/jail.png\" x=0 y=0 width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
    ;; ship
    [:rect {:x (to-scale 400) :y (to-scale 240) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
-   [:text {:x (to-scale 400) :y (to-scale 255) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "ship"]
+   [:g {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/ship.png\" x=\"" (to-scale 400) "\" y=\"" (to-scale 240) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
    ])
-
-
 
 (def piece-positions
   [
@@ -241,8 +248,9 @@
 (defn normal-space [x y]
   [:rect {:x (to-scale x) :y (to-scale y) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}])
 
-(defn space-text [x y s]
-  [:text {:x (to-scale x) :y (to-scale y) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "small"}} s])
+(defn space-image [x y icon]
+  [:g {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"" (icon icon-images) "\" x=\"" (to-scale x) "\" y=\"" (to-scale y) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
+  )
 
 (defn normal-spaces []
   (apply concat
@@ -250,8 +258,8 @@
            (when-let [space-data (get-in @app-state [:board i])]
              (let [position (get piece-positions i)
                    space (normal-space (:x position) (:y position))
-                   text (space-text (:text-x position) (:text-y position) (name (:icon space-data)))]
-               [space text]
+                   image (space-image (:x position) (:y position) (:icon space-data))]
+               [space image]
                )))))
 
 (defn main-view []
@@ -285,7 +293,6 @@
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
-    (new-game!)
     (reagent/render-component [main-view] app)))
 
 (main)
