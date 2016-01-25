@@ -152,7 +152,7 @@
    [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 300) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
    ;; jail
    [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
-   [:text {:x 0 :y (to-scale 15) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "jail"]
+   [:g {:dangerouslySetInnerHTML {:__html "<image xlink:href=\"img/jail.png\" x=0 y=0 height=\"50px\" width=\"50px\" />"}}]
    ;; ship
    [:rect {:x (to-scale 400) :y (to-scale 240) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
    [:text {:x (to-scale 400) :y (to-scale 255) :style {:text-anchor "start" :stroke "none" :fill "black" :font-size "smaller"}} "ship"]
@@ -260,7 +260,7 @@
     [:div
      [:div
       (-> [:svg
-           {:view-box (str "0 0" (to-scale 501) (to-scale 301))
+           {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
             :width (to-scale 501)
             :height (to-scale 301)}]
           (into (static-board))
