@@ -44,7 +44,7 @@
                                  {:index 35, :icon :knife, :pirates []}
                                  {:index 36, :icon :hat, :pirates []}
                                  {:index 37, :icon :ship, :pirates []}],
-                         :players [{:name "tanya", :color :orange, :cards [:hat :skull :knife :gun :bottle :key]}
+                         :players [{:name "tanya", :color :orange, :cards [:hat :skull :knife :gun :bottle :key :gun]}
                                    {:name "rusty", :color :black, :cards [:hat :gun :knife :gun :bottle :skull]}],
                          :player-order ["tanya" "rusty"],
                          :current-player "tanya",
@@ -170,51 +170,51 @@
 (def piece-positions
   [
    ;; jail
-   {:x 0 :y 0 :text-x 0 :text-y 15}
+   {:x 0 :y 0}
    ;; row 1, left to right
-   {:x 50 :y 60 :text-x 50 :text-y 75}
-   {:x 90 :y 60 :text-x 90 :text-y 75}
-   {:x 130 :y 60 :text-x 130 :text-y 75}
-   {:x 170 :y 60 :text-x 170 :text-y 75}
-   {:x 210 :y 60 :text-x 210 :text-y 75}
-   {:x 250 :y 60 :text-x 250 :text-y 75}
-   {:x 290 :y 60 :text-x 290 :text-y 75}
-   {:x 330 :y 60 :text-x 330 :text-y 75}
-   {:x 370 :y 60 :text-x 370 :text-y 75}
-   {:x 410 :y 60 :text-x 410 :text-y 75}
-   {:x 450 :y 60 :text-x 450 :text-y 75}
+   {:x 50 :y 60}
+   {:x 90 :y 60}
+   {:x 130 :y 60}
+   {:x 170 :y 60}
+   {:x 210 :y 60}
+   {:x 250 :y 60}
+   {:x 290 :y 60}
+   {:x 330 :y 60}
+   {:x 370 :y 60}
+   {:x 410 :y 60}
+   {:x 450 :y 60}
    ;; transition 1
-   {:x 450 :y 90 :text-x 450 :text-y 105}
+   {:x 450 :y 90}
    ;; row 2, right to left
-   {:x 450 :y 120 :text-x 450 :text-y 135}
-   {:x 410 :y 120 :text-x 410 :text-y 135}
-   {:x 370 :y 120 :text-x 370 :text-y 135}
-   {:x 330 :y 120 :text-x 330 :text-y 135}
-   {:x 290 :y 120 :text-x 290 :text-y 135}
-   {:x 250 :y 120 :text-x 250 :text-y 135}
-   {:x 210 :y 120 :text-x 210 :text-y 135}
-   {:x 170 :y 120 :text-x 170 :text-y 135}
-   {:x 130 :y 120 :text-x 130 :text-y 135}
-   {:x 90 :y 120 :text-x 90 :text-y 135}
-   {:x 50 :y 120 :text-x 50 :text-y 135}
+   {:x 450 :y 120}
+   {:x 410 :y 120}
+   {:x 370 :y 120}
+   {:x 330 :y 120}
+   {:x 290 :y 120}
+   {:x 250 :y 120}
+   {:x 210 :y 120}
+   {:x 170 :y 120}
+   {:x 130 :y 120}
+   {:x 90 :y 120}
+   {:x 50 :y 120}
    ;; transition 2
-   {:x 50 :y 150 :text-x 50 :text-y 165}
+   {:x 50 :y 150}
    ;; row 3, left to right
-   {:x 50 :y 180 :text-x 50 :text-y 195}
-   {:x 90 :y 180 :text-x 90 :text-y 195}
-   {:x 130 :y 180 :text-x 130 :text-y 195}
-   {:x 170 :y 180 :text-x 170 :text-y 195}
-   {:x 210 :y 180 :text-x 210 :text-y 195}
-   {:x 250 :y 180 :text-x 250 :text-y 195}
-   {:x 290 :y 180 :text-x 290 :text-y 195}
-   {:x 330 :y 180 :text-x 330 :text-y 195}
-   {:x 370 :y 180 :text-x 370 :text-y 195}
-   {:x 410 :y 180 :text-x 410 :text-y 195}
-   {:x 450 :y 180 :text-x 450 :text-y 195}
+   {:x 50 :y 180}
+   {:x 90 :y 180}
+   {:x 130 :y 180}
+   {:x 170 :y 180}
+   {:x 210 :y 180}
+   {:x 250 :y 180}
+   {:x 290 :y 180}
+   {:x 330 :y 180}
+   {:x 370 :y 180}
+   {:x 410 :y 180}
+   {:x 450 :y 180}
    ;; transition 3
-   {:x 450 :y 210 :text-x 450 :text-y 225}
+   {:x 450 :y 210}
    ;; ship
-   {:x 400 :y 240 :text-x 400 :text-y 415}
+   {:x 400 :y 240}
  ])
 
 (defn jail []
@@ -231,6 +231,7 @@
                    (let [y (to-scale (+ 35 (* 10 pirate-index)))]
                      [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
 
+;; TODO: this looks almost exactly like jail
 (defn ship []
   (when-let [ship (get-in @app-state [:board 37])]
     (apply concat
@@ -262,22 +263,48 @@
                [space image]
                )))))
 
+(defn active-player
+  "Returns the active player from the players collection by name."
+  [game-state]
+  (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
+
 (defn main-view []
   [:center
    [:h1 "CARTAGENA"
     [:div
-     [:div
-      (-> [:svg
-           {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
-            :width (to-scale 501)
-            :height (to-scale 301)}]
-          (into (static-board))
-          (into (jail))
-          (into (normal-spaces))
-          (into (ship))
-          )]
-     [:div
-      [:label "player area"]]]
+     (-> [:svg
+          {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
+           :width (to-scale 501)
+           :height (to-scale 301)}]
+         (into (static-board))
+         (into (jail))
+         (into (normal-spaces))
+         (into (ship))
+         )]
+    [:h2 "Player Area"
+
+      (let [{:keys [color cards] player-name :name} (active-player @app-state)
+            card-groups (frequencies cards)]
+        [:div
+         [:table
+          [:tr
+           [:td "Player"]
+           [:td player-name]]
+          [:tr
+           [:td "Color"]
+           [:td
+            [:svg {:width 20 :height 20}
+             [:circle {:cx 10 :cy 10 :r 7 :fill (name color)}]]
+            [:span {:style {:color (name color)}} (name color)]]]
+          [:tr
+           [:td "Cards"]
+           [:td (for [[card num] card-groups]
+                  ^{:key card}
+                  [:span {:style {:float "left"}}
+                   [:figure
+                    [:img {:src (card icon-images) :width 30 :height 30}]
+                    [:center [:figcaption num]]]])]]]
+      ])]
     ]])
 
 (defn on-error [{:keys [status status-text]}]
