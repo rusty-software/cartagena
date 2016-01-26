@@ -145,7 +145,7 @@
 (defonce app-state (atom initial-game-state))
 
 (defn to-scale [n]
-  (* 1.8 n))
+  (* 1.65 n))
 
 (def icon-images {:jail "img/jail.png"
                   :ship "img/ship.png"
@@ -281,31 +281,27 @@
          (into (normal-spaces))
          (into (ship))
          )]
-    [:h2 "Player Area"
-
-      (let [{:keys [color cards] player-name :name} (active-player @app-state)
-            card-groups (frequencies cards)]
-        [:div
-         [:table
-          [:tr
-           [:td "Player"]
-           [:td player-name]]
-          [:tr
-           [:td "Color"]
-           [:td
-            [:svg {:width 20 :height 20}
-             [:circle {:cx 10 :cy 10 :r 7 :fill (name color)}]]
-            [:span {:style {:color (name color)}} (name color)]]]
-          [:tr
-           [:td "Cards"]
-           [:td (for [[card num] card-groups]
-                  ^{:key card}
-                  [:span {:style {:float "left"}}
-                   [:figure
-                    [:img {:src (card icon-images) :width 30 :height 30}]
-                    [:center [:figcaption num]]]])]]]
-      ])]
-    ]])
+    (let [{:keys [color cards] player-name :name} (active-player @app-state)
+          card-groups (frequencies cards)]
+      [:div
+       [:table
+        [:tr
+         [:td "Player"]
+         [:td player-name]]
+        [:tr
+         [:td "Color"]
+         [:td
+          [:svg {:width (to-scale 20) :height (to-scale 20)}
+           [:circle {:cx (to-scale 10) :cy (to-scale 10) :r (to-scale 7) :fill (name color)}]]
+          [:span {:style {:color (name color)}} (name color)]]]
+        [:tr
+         [:td "Cards"]
+         [:td (for [[card num] card-groups]
+                ^{:key card}
+                [:span {:style {:float "left"}}
+                 [:figure
+                  [:img {:src (card icon-images) :width (to-scale 30) :height (to-scale 30)}]
+                  [:center [:figcaption num]]]])]]]])]])
 
 (defn on-error [{:keys [status status-text]}]
   (.log js/console (str "ERROR [" status "] " status-text)))
