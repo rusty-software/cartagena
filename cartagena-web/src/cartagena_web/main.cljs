@@ -158,13 +158,34 @@
 
 (defn static-board []
   [;; board
-   [:rect {:x 0 :y 0 :width (to-scale 500) :height (to-scale 300) :stroke "black" :stroke-width "0.5" :fill "burlywood"}]
+   [:rect
+    {:x 0
+     :y 0
+     :width (to-scale 500)
+     :height (to-scale 300)
+     :stroke "black"
+     :stroke-width "0.5"
+     :fill "burlywood"}]
    ;; jail
-   [:rect {:x 0 :y 0 :width (to-scale 50) :height (to-scale 90) :stroke "black" :fill "darkgray"}]
-   [:g {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/jail.png\" x=0 y=0 width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
+   [:rect
+    {:x 0
+     :y 0
+     :width (to-scale 50)
+     :height (to-scale 90)
+     :stroke "black"
+     :fill "darkgray"}]
+   [:g
+    {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/jail.png\" x=0 y=0 width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
    ;; ship
-   [:rect {:x (to-scale 400) :y (to-scale 240) :width (to-scale 90) :height (to-scale 50) :stroke "black" :fill "sienna"}]
-   [:g {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/ship.png\" x=\"" (to-scale 400) "\" y=\"" (to-scale 240) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
+   [:rect
+    {:x (to-scale 400)
+     :y (to-scale 240)
+     :width (to-scale 90)
+     :height (to-scale 50)
+     :stroke "black"
+     :fill "sienna"}]
+   [:g
+    {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/ship.png\" x=\"" (to-scale 400) "\" y=\"" (to-scale 240) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
    ])
 
 (def piece-positions
@@ -217,6 +238,9 @@
    {:x 400 :y 240}
  ])
 
+(defn pirate-click [game-state color from-space-index]
+  (println "clicked pirate:" color from-space-index))
+
 (defn jail []
   (when-let [jail (get-in @app-state [:board 0])]
     (apply concat
@@ -229,7 +253,13 @@
                      x (to-scale (+ 5 (* 10 player-index)))]
                  (for [pirate-index (range pirate-count)]
                    (let [y (to-scale (+ 35 (* 10 pirate-index)))]
-                     [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
+                     [:circle
+                      {:cx x
+                       :cy y
+                       :r (to-scale 4)
+                       :fill color-name
+                       :on-click (fn jail-click [e]
+                                   (pirate-click @app-state pirate-color 0))}]))))))))
 
 ;; TODO: this looks almost exactly like jail
 (defn ship []
@@ -244,14 +274,28 @@
                      x (to-scale (+ 445 (* 10 player-index)))]
                  (for [pirate-index (range pirate-count)]
                    (let [y (to-scale (+ 245 (* 10 pirate-index)))]
-                     [:circle {:cx x :cy y :r (to-scale 4) :fill color-name}]))))))))
+                     [:circle
+                      {:cx x
+                       :cy y
+                       :r (to-scale 4)
+                       :fill color-name
+                       :on-click (fn ship-click [e]
+                                   (pirate-click @app-state pirate-color 37))}]))))))))
 
 (defn normal-space [x y]
-  [:rect {:x (to-scale x) :y (to-scale y) :width (to-scale 40) :height (to-scale 30) :stroke "black" :stroke-width "0.5" :fill "lightgray"}])
+  [:rect
+   {:x (to-scale x)
+    :y (to-scale y)
+    :width (to-scale 40)
+    :height (to-scale 30)
+    :stroke "black"
+    :stroke-width "0.5"
+    :fill "lightgray"}])
 
 (defn space-image [x y icon]
-  [:g {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"" (icon icon-images) "\" x=\"" (to-scale x) "\" y=\"" (to-scale y) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
-  )
+  [:g
+   {:dangerouslySetInnerHTML
+    {:__html (str "<image xlink:href=\"" (icon icon-images) "\" x=\"" (to-scale x) "\" y=\"" (to-scale y) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}])
 
 (defn normal-spaces []
   (apply concat
@@ -263,10 +307,14 @@
                [space image]
                )))))
 
+;; TODO: duplicated from server code
 (defn active-player
   "Returns the active player from the players collection by name."
   [game-state]
   (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
+
+(defn card-click [game-state card]
+  (println "card-click" card))
 
 (defn main-view []
   [:center
@@ -291,8 +339,14 @@
         [:tr
          [:td "Color"]
          [:td
-          [:svg {:width (to-scale 20) :height (to-scale 20)}
-           [:circle {:cx (to-scale 10) :cy (to-scale 10) :r (to-scale 7) :fill (name color)}]]
+          [:svg
+           {:width (to-scale 20)
+            :height (to-scale 20)}
+           [:circle
+            {:cx (to-scale 10)
+             :cy (to-scale 10)
+             :r (to-scale 7)
+             :fill (name color)}]]
           [:span {:style {:color (name color)}} (name color)]]]
         [:tr
          [:td "Cards"]
@@ -300,7 +354,12 @@
                 ^{:key card}
                 [:span {:style {:float "left"}}
                  [:figure
-                  [:img {:src (card icon-images) :width (to-scale 30) :height (to-scale 30)}]
+                  [:img
+                   {:src (card icon-images)
+                    :width (to-scale 30)
+                    :height (to-scale 30)
+                    :on-click (fn ship-click [e]
+                                   (card-click @app-state card))}]
                   [:center [:figcaption num]]]])]]]])]])
 
 (defn on-error [{:keys [status status-text]}]
