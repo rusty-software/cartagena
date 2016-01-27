@@ -257,7 +257,24 @@
               :handler on-new-game
               :error-handler on-error}))
 
+(defn on-update-active-player [response]
+  (reset! app-state (assoc @app-state :actions-remaining (:actions-remaining response)
+                                     :current-player (:current-player response))))
+
+(defn update-active-player! [{:keys [actions-remaining current-player player-order]}]
+  (ajax/POST "http://localhost:3000/update-active-player"
+             {:params {:actions-remaining actions-remaining
+                       :current-player current-player
+                       :player-order player-order}
+              :handler on-update-active-player
+              :error on-error}))
+
 (defn on-play-card [response]
+  ;; TODO: call update current player
+  (reset! app-state (assoc @app-state :board (:board response)
+                                      :discard-pile (:discard-pile response)
+                                      :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
+  (update-active-player! @app-state)
   (println "on-play-card" response))
 
 (defn play-card! [player card from-space board discard-pile]
