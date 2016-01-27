@@ -244,12 +244,39 @@
   [game-state]
   (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
 
+(defn on-error [{:keys [status status-text]}]
+  (.log js/console (str "ERROR [" status "] " status-text)))
+
+(defn on-new-game [response]
+  (println "on-new-game" response)
+  (reset! app-state response))
+
+(defn new-game! []
+  (ajax/POST "http://localhost:3000/new-game"
+             {:params {:players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]}
+              :handler on-new-game
+              :error-handler on-error}))
+
+(defn on-play-card [response]
+  (println "on-play-card" response))
+
+(defn play-card! [player card from-space board discard-pile]
+  (ajax/POST "http://localhost:3000/play-card"
+             {:params {:player player
+                       :icon card
+                       :from-space from-space
+                       :board board
+                       :discard-pile discard-pile}
+              :handler on-play-card
+              :error-handler on-error}))
+
 (defn pirate-click [color from-space-index]
-  (if-let [selected-card (:selected-card @app-state)]
-    (when (= color (:color (active-player @app-state)))
-      (do
-        (println "moving" color "from" from-space-index "to" selected-card "; call the server and get the new game state back")
-        (reset! app-state (dissoc @app-state :selected-card)))
+  (when (= color (:color (active-player @app-state)))
+    (if-let [selected-card (:selected-card @app-state)]
+      (let [player (active-player @app-state)
+            board (:board @app-state)
+            from-space (get board from-space-index)]
+        (play-card! player selected-card from-space board (:discard-pile @app-state)))
       (println "moving" color "from" from-space-index "backward; call the server and get the new game state back"))))
 
 (defn jail []
@@ -324,18 +351,6 @@
     (println "card-click" card)
     (reset! app-state (assoc @app-state :selected-card card))))
 
-(defn on-error [{:keys [status status-text]}]
-  (.log js/console (str "ERROR [" status "] " status-text)))
-
-(defn on-new-game [response]
-  (println "on-new-game" response)
-  (reset! app-state response))
-
-(defn new-game! []
-  (ajax/POST "http://localhost:3000/new-game"
-             {:params {:players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]}
-              :handler on-new-game
-              :error-handler on-error}))
 
 (defn main-view []
   [:center
