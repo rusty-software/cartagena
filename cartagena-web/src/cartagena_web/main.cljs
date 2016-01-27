@@ -236,10 +236,14 @@
    {:x 450 :y 210}
    ;; ship
    {:x 400 :y 240}
- ])
+   ])
 
 (defn pirate-click [game-state color from-space-index]
-  (println "clicked pirate:" color from-space-index))
+  (if-let [selected-card (:selected-card @app-state)]
+    (do
+      (println "moving" color "from" from-space-index "to" selected-card "; call the server and get the new game state back")
+      (reset! app-state (dissoc @app-state :selected-card)))
+    (println "moving" color "from" from-space-index "backward; call the server and get the new game state back")))
 
 (defn jail []
   (when-let [jail (get-in @app-state [:board 0])]
@@ -314,64 +318,80 @@
   (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
 
 (defn card-click [game-state card]
-  (println "card-click" card))
-
-(defn main-view []
-  [:center
-   [:h1 "CARTAGENA"
-    [:div
-     (-> [:svg
-          {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
-           :width (to-scale 501)
-           :height (to-scale 301)}]
-         (into (static-board))
-         (into (jail))
-         (into (normal-spaces))
-         (into (ship))
-         )]
-    (let [{:keys [color cards] player-name :name} (active-player @app-state)
-          card-groups (frequencies cards)]
-      [:div
-       [:table
-        [:tr
-         [:td "Player"]
-         [:td player-name]]
-        [:tr
-         [:td "Color"]
-         [:td
-          [:svg
-           {:width (to-scale 20)
-            :height (to-scale 20)}
-           [:circle
-            {:cx (to-scale 10)
-             :cy (to-scale 10)
-             :r (to-scale 7)
-             :fill (name color)}]]
-          [:span {:style {:color (name color)}} (name color)]]]
-        [:tr
-         [:td "Cards"]
-         [:td (for [[card num] card-groups]
-                ^{:key card}
-                [:span {:style {:float "left"}}
-                 [:figure
-                  [:img
-                   {:src (card icon-images)
-                    :width (to-scale 30)
-                    :height (to-scale 30)
-                    :on-click (fn ship-click [e]
-                                   (card-click @app-state card))}]
-                  [:center [:figcaption num]]]])]]]])]])
+  (do
+    (println "card-click" card)
+    (reset! app-state (assoc @app-state :selected-card card))))
 
 (defn on-error [{:keys [status status-text]}]
   (.log js/console (str "ERROR [" status "] " status-text)))
 
 (defn on-new-game [response]
+  (println "on-new-game" response)
   (reset! app-state response))
 
 (defn new-game! []
-  (ajax/GET "http://localhost:3000/fake-game"
-            {:handler on-new-game
-             :error-handler on-error}))
+  (ajax/POST "http://localhost:3000/new-game"
+             {:params {:players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]}
+              :handler on-new-game
+              :error-handler on-error}))
+
+(defn main-view []
+  [:center
+   [:h1 "CARTAGENA"]
+   [:div
+    [:button
+     {:class "button"
+      :on-click (fn button-click [e]
+                  (new-game!))}
+     "New Game"]]
+   [:div
+    (-> [:svg
+         {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
+          :width (to-scale 501)
+          :height (to-scale 301)}]
+        (into (static-board))
+        (into (jail))
+        (into (normal-spaces))
+        (into (ship))
+        )]
+   (let [{:keys [color cards] player-name :name} (active-player @app-state)
+         card-groups (frequencies cards)]
+     [:div
+      [:table
+       {:class "t1"}
+       [:tbody
+        [:tr
+         [:td "Player"]
+         [:td player-name]]]
+       [:tr
+        [:td "Color"]
+        [:td
+         [:svg
+          {:width (to-scale 20)
+           :height (to-scale 20)}
+          [:circle
+           {:cx (to-scale 10)
+            :cy (to-scale 10)
+            :r (to-scale 7)
+            :fill (name color)}]]
+         [:span {:style {:color (name color)}} (name color)]]]
+       [:tr
+        [:td "Actions Remaining"]
+        [:td (:actions-remaining @app-state)]]
+       [:tr
+        [:td "Cards"]
+        [:td (for [[card num] card-groups]
+               ^{:key card}
+               [:span {:style {:float "left"}}
+                [:figure
+                 [:img
+                  {:src (card icon-images)
+                   :width (to-scale 30)
+                   :height (to-scale 30)
+                   :on-click (fn ship-click [e]
+                               (card-click @app-state card))}]
+                 [:center [:figcaption num]]]])]]]])])
+
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
