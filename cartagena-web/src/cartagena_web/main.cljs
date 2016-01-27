@@ -273,6 +273,7 @@
   (reset! app-state (assoc @app-state :board (:board response)
                                       :discard-pile (:discard-pile response)
                                       :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
+  (reset! app-state (dissoc @app-state :selected-card))
   (update-active-player! @app-state))
 
 (defn play-card! [player card from-space board discard-pile]
@@ -285,14 +286,33 @@
               :handler on-play-card
               :error-handler on-error}))
 
+(defn on-move-back [response]
+  (when-let [board (:board response)]
+    (reset! app-state (assoc @app-state :board board
+                                        :draw-pile (:draw-pile response)
+                                        :discard-pile (:discard-pile response)
+                                        :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
+    (update-active-player! @app-state)))
+
+(defn move-back! [player from-space board draw-pile discard-pile]
+  (ajax/POST "http://localhost:3000/move-back"
+             {:params {:player player
+                       :from-space from-space
+                       :board board
+                       :draw-pile draw-pile
+                       :discard-pile discard-pile}
+              :handler on-move-back
+              :error-handler on-error}))
+
 (defn pirate-click [color from-space-index]
   (when (= color (:color (active-player @app-state)))
-    (if-let [selected-card (:selected-card @app-state)]
-      (let [player (active-player @app-state)
-            board (:board @app-state)
-            from-space (get board from-space-index)]
-        (play-card! player selected-card from-space board (:discard-pile @app-state)))
-      (println "moving" color "from" from-space-index "backward; call the server and get the new game state back"))))
+    (let [player (active-player @app-state)
+          board (:board @app-state)
+          from-space (get board from-space-index)
+          discard-pile (:discard-pile @app-state)]
+      (if-let [selected-card (:selected-card @app-state)]
+        (play-card! player selected-card from-space board discard-pile)
+        (move-back! player from-space board (:draw-pile @app-state) discard-pile)))))
 
 (defn jail []
   (when-let [jail (get-in @app-state [:board 0])]
@@ -377,11 +397,11 @@
                    pirates (circles-for i x y (:pirates space-data))]
                (conj [space image] pirates))))))
 
+(defn select-card! [card]
+  (reset! app-state (assoc @app-state :selected-card card)))
 
-(defn card-click [card]
-  (do
-    (println "card-click" card)
-    (reset! app-state (assoc @app-state :selected-card card))))
+(defn unselect-card! []
+  (reset! app-state (dissoc @app-state :selected-card)))
 
 (defn main-view []
   [:center
@@ -437,9 +457,19 @@
                     {:src (card icon-images)
                      :width (to-scale 30)
                      :height (to-scale 30)
-                     :on-click (fn ship-click [e]
-                                 (card-click card))}]
+                     :on-click (fn img-click [e]
+                                 (select-card! card))}]
                    [:center [:figcaption num]]]])]]
+         [:tr
+          [:td "Selected Card"]
+          [:td [:span {:style {:float "left"}}
+                (when-let [selected-card (:selected-card @app-state)]
+                  [:img
+                   {:src (selected-card icon-images)
+                    :width (to-scale 30)
+                    :height (to-scale 30)
+                    :on-click (fn img-click [e]
+                                (unselect-card!))}])]]]
          [:tr
           [:td {:colSpan 2}
            [:center
