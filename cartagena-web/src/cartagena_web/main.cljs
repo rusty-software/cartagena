@@ -270,12 +270,10 @@
               :error on-error}))
 
 (defn on-play-card [response]
-  ;; TODO: call update current player
   (reset! app-state (assoc @app-state :board (:board response)
                                       :discard-pile (:discard-pile response)
                                       :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
-  (update-active-player! @app-state)
-  (println "on-play-card" response))
+  (update-active-player! @app-state))
 
 (defn play-card! [player card from-space board discard-pile]
   (ajax/POST "http://localhost:3000/play-card"
@@ -352,22 +350,38 @@
    {:dangerouslySetInnerHTML
     {:__html (str "<image xlink:href=\"" (icon icon-images) "\" x=\"" (to-scale x) "\" y=\"" (to-scale y) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}])
 
+(defn circles-for [space-index x y colors]
+  (for [color-index (range (count colors))]
+    (let [color (get colors color-index)
+          color-name (name color)
+          cx (to-scale (+ 35 x))
+          cy (to-scale (+ y 5 (* 10 color-index)))]
+      ^{:key color-index}
+      [:circle
+       {:cx cx
+        :cy cy
+        :r (to-scale 4)
+        :fill color-name
+        :on-click (fn circle-click [e]
+                    (pirate-click color space-index))}])))
+
 (defn normal-spaces []
   (apply concat
          (for [i (range 1 37)]
            (when-let [space-data (get-in @app-state [:board i])]
              (let [position (get piece-positions i)
-                   space (normal-space (:x position) (:y position))
-                   image (space-image (:x position) (:y position) (:icon space-data))]
-               [space image]
-               )))))
+                   x (:x position)
+                   y (:y position)
+                   space (normal-space x y)
+                   image (space-image x y (:icon space-data))
+                   pirates (circles-for i x y (:pirates space-data))]
+               (conj [space image] pirates))))))
 
 
 (defn card-click [card]
   (do
     (println "card-click" card)
     (reset! app-state (assoc @app-state :selected-card card))))
-
 
 (defn main-view []
   [:center
@@ -396,7 +410,7 @@
          {:class "t1"}
          [:tbody
           [:tr
-           [:td "Player"]
+           [:td "Current Player"]
            [:td player-name]]]
          [:tr
           [:td "Color"]
@@ -425,8 +439,12 @@
                      :height (to-scale 30)
                      :on-click (fn ship-click [e]
                                  (card-click card))}]
-                   [:center [:figcaption num]]]])]]]]))])
-
+                   [:center [:figcaption num]]]])]]
+         [:tr
+          [:td {:colSpan 2}
+           [:center
+            [:button {:on-click (fn btn-click [e]
+                                  (update-active-player! @app-state))} "Pass"]]]]]]))])
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
