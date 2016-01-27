@@ -11,6 +11,10 @@
 (defroutes app-routes
            (GET "/" [] "<h1>Hello World</h1>")
 
+           (POST "/update-active-player" req
+             (let [{:keys [actions-remaining current-player player-order]} (:body req)]
+               (response/response (engine/update-current-player actions-remaining current-player player-order))))
+
            (POST "/play-card" req
              (let [{:keys [player icon from-space board discard-pile]} (:body req)]
                (response/response (engine/play-card player icon from-space board discard-pile))))
