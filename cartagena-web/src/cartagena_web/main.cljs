@@ -142,7 +142,7 @@
                          :discard-pile []}
   )
 
-(defonce app-state (atom initial-game-state))
+(defonce app-state (atom nil))
 
 (defn to-scale [n]
   (* 1.65 n))
@@ -238,12 +238,19 @@
    {:x 400 :y 240}
    ])
 
-(defn pirate-click [game-state color from-space-index]
+;; TODO: duplicated from server code
+(defn active-player
+  "Returns the active player from the players collection by name."
+  [game-state]
+  (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
+
+(defn pirate-click [color from-space-index]
   (if-let [selected-card (:selected-card @app-state)]
-    (do
-      (println "moving" color "from" from-space-index "to" selected-card "; call the server and get the new game state back")
-      (reset! app-state (dissoc @app-state :selected-card)))
-    (println "moving" color "from" from-space-index "backward; call the server and get the new game state back")))
+    (when (= color (:color (active-player @app-state)))
+      (do
+        (println "moving" color "from" from-space-index "to" selected-card "; call the server and get the new game state back")
+        (reset! app-state (dissoc @app-state :selected-card)))
+      (println "moving" color "from" from-space-index "backward; call the server and get the new game state back"))))
 
 (defn jail []
   (when-let [jail (get-in @app-state [:board 0])]
@@ -263,7 +270,7 @@
                        :r (to-scale 4)
                        :fill color-name
                        :on-click (fn jail-click [e]
-                                   (pirate-click @app-state pirate-color 0))}]))))))))
+                                   (pirate-click pirate-color 0))}]))))))))
 
 ;; TODO: this looks almost exactly like jail
 (defn ship []
@@ -284,7 +291,7 @@
                        :r (to-scale 4)
                        :fill color-name
                        :on-click (fn ship-click [e]
-                                   (pirate-click @app-state pirate-color 37))}]))))))))
+                                   (pirate-click pirate-color 37))}]))))))))
 
 (defn normal-space [x y]
   [:rect
@@ -311,13 +318,8 @@
                [space image]
                )))))
 
-;; TODO: duplicated from server code
-(defn active-player
-  "Returns the active player from the players collection by name."
-  [game-state]
-  (first (filter #(= (:current-player game-state) (:name %)) (:players game-state))))
 
-(defn card-click [game-state card]
+(defn card-click [card]
   (do
     (println "card-click" card)
     (reset! app-state (assoc @app-state :selected-card card))))
@@ -350,47 +352,48 @@
           :width (to-scale 501)
           :height (to-scale 301)}]
         (into (static-board))
-        (into (jail))
         (into (normal-spaces))
+        (into (jail))
         (into (ship))
         )]
-   (let [{:keys [color cards] player-name :name} (active-player @app-state)
-         card-groups (frequencies cards)]
-     [:div
-      [:table
-       {:class "t1"}
-       [:tbody
-        [:tr
-         [:td "Player"]
-         [:td player-name]]]
-       [:tr
-        [:td "Color"]
-        [:td
-         [:svg
-          {:width (to-scale 20)
-           :height (to-scale 20)}
-          [:circle
-           {:cx (to-scale 10)
-            :cy (to-scale 10)
-            :r (to-scale 7)
-            :fill (name color)}]]
-         [:span {:style {:color (name color)}} (name color)]]]
-       [:tr
-        [:td "Actions Remaining"]
-        [:td (:actions-remaining @app-state)]]
-       [:tr
-        [:td "Cards"]
-        [:td (for [[card num] card-groups]
-               ^{:key card}
-               [:span {:style {:float "left"}}
-                [:figure
-                 [:img
-                  {:src (card icon-images)
-                   :width (to-scale 30)
-                   :height (to-scale 30)
-                   :on-click (fn ship-click [e]
-                               (card-click @app-state card))}]
-                 [:center [:figcaption num]]]])]]]])])
+   (when-let [active-player (active-player @app-state)]
+     (let [{:keys [color cards] player-name :name} active-player
+           card-groups (frequencies cards)]
+       [:div
+        [:table
+         {:class "t1"}
+         [:tbody
+          [:tr
+           [:td "Player"]
+           [:td player-name]]]
+         [:tr
+          [:td "Color"]
+          [:td
+           [:svg
+            {:width (to-scale 20)
+             :height (to-scale 20)}
+            [:circle
+             {:cx (to-scale 10)
+              :cy (to-scale 10)
+              :r (to-scale 7)
+              :fill (name color)}]]
+           [:span {:style {:color (name color)}} (name color)]]]
+         [:tr
+          [:td "Actions Remaining"]
+          [:td (:actions-remaining @app-state)]]
+         [:tr
+          [:td "Cards"]
+          [:td (for [[card num] card-groups]
+                 ^{:key card}
+                 [:span {:style {:float "left"}}
+                  [:figure
+                   [:img
+                    {:src (card icon-images)
+                     :width (to-scale 30)
+                     :height (to-scale 30)
+                     :on-click (fn ship-click [e]
+                                 (card-click card))}]
+                   [:center [:figcaption num]]]])]]]]))])
 
 
 (defn ^:export main []
