@@ -19,6 +19,10 @@
              (let [{:keys [player icon from-space board discard-pile]} (:body req)]
                (response/response (engine/play-card player icon from-space board discard-pile))))
 
+           (POST "/move-back" req
+             (let [{:keys [player from-space board draw-pile discard-pile]} (:body req)]
+               (response/response (engine/move-back player from-space board draw-pile discard-pile))))
+
            (POST "/new-game" req
              (if-let [players (get (:body req) :players)]
                (response/response (engine/new-game! players))
