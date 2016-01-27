@@ -11,6 +11,10 @@
 (defroutes app-routes
            (GET "/" [] "<h1>Hello World</h1>")
 
+           (POST "/play-card" req
+             (let [{:keys [player icon from-space board discard-pile]} (:body req)]
+               (response/response (engine/play-card player icon from-space board discard-pile))))
+
            (POST "/new-game" req
              (if-let [players (get (:body req) :players)]
                (response/response (engine/new-game! players))
