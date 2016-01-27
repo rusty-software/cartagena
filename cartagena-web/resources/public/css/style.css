@@ -1,9 +1,11 @@
-/* some style */
 
-table, th, td {
-    border: 1px solid black;
-    border-collapse: collapse;
-    margin: 2px;
-    padding: 2px;
-    font-size: smaller;
-}
+table {
+        border-collapse: collapse;
+        border: 1px solid;
+    }
+
+table td {
+        border: 1px solid;
+        padding: 2px;
+        spacing: 2px;
+    }
