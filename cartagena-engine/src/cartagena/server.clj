@@ -7,15 +7,14 @@
     [ring.util.response :as response]
     [cartagena.core :as engine]))
 
+(def default-players [{:name "tanya" :color :orange} {:name "rusty" :color :black}])
 (defroutes app-routes
            (GET "/" [] "<h1>Hello World</h1>")
 
-           (GET "/fake-game" []
-             (response/response (engine/new-game! [{:name "tanya" :color :orange} {:name "rusty" :color :black}])))
-
            (POST "/new-game" req
-             (let [players (get (:params req) :players)]
-               (engine/new-game! players)))
+             (if-let [players (get (:body req) :players)]
+               (response/response (engine/new-game! players))
+               (response/response (engine/new-game! default-players))))
 
            (route/not-found "<h1>Page not found</h1>"))
 
