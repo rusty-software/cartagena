@@ -5,6 +5,13 @@
 (enable-console-print!)
 
 (defonce app-state (atom nil))
+(defonce names (atom {:black nil :blue nil :green nil :orange nil :red nil}))
+
+(defn set-name! [color name]
+  (swap! names assoc color name))
+
+(defn get-name [color]
+  (color @names))
 
 (defn to-scale [n]
   (* 1.65 n))
@@ -114,10 +121,21 @@
   (reset! app-state response))
 
 (defn new-game! []
+  (let [players (cond-> []
+                        (get-name :black) (conj {:name (get-name :black) :color :black})
+                        (get-name :blue) (conj {:name (get-name :blue) :color :blue})
+                        (get-name :green) (conj {:name (get-name :green) :color :green})
+                        (get-name :orange) (conj {:name (get-name :orange) :color :orange})
+                        (get-name :red) (conj {:name (get-name :red) :color :red})
+                        )]
+  (reset! app-state (dissoc @app-state :select-players))
   (ajax/POST "http://localhost:3000/new-game"
-             {:params {:players [{:name "tanya" :color :orange} {:name "rusty" :color :black}]}
+             {:params {:players players}
               :handler on-new-game
-              :error-handler on-error}))
+              :error-handler on-error})))
+
+(defn select-players! []
+  (reset! app-state (assoc @app-state :select-players true)))
 
 (defn on-update-active-player [response]
   (reset! app-state (assoc @app-state :actions-remaining (:actions-remaining response)
@@ -285,14 +303,74 @@
    [:h1 "CARTAGENA"]
    [:div
     [:button
-     {:class "button"
+     {:class "myButton"
       :on-click (fn button-click [e]
-                  (new-game!))}
+                  (select-players!))}
      "New Game"]]
    (when (and @app-state (:game-over @app-state))
      [:div
       [:h2 "WE HAVE A WINNER!"]
       [:h3 (str "Congratulations, " (:name (active-player @app-state)) "!")]])
+   (when (and @app-state (:select-players @app-state))
+     [:div
+      [:table {:class "t1"}
+       [:thead
+        [:tr
+         [:th "Color"]
+         [:th "Player"]]]
+       [:tbody
+        [:tr
+         [:td
+          [:label {:for "black-name" :style {:color "black"}} "black"]]
+         [:td
+          [:input
+           {:type "text"
+            :name "black-name"
+            :value (get-name :black)
+            :on-change #(set-name! :black (-> % .-target .-value))}]]]
+        [:tr
+         [:td
+          [:label {:for "blue-name" :style {:color "blue"}} "blue"]]
+         [:td
+          [:input
+           {:type "text"
+            :name "blue-name"
+            :value (get-name :blue)
+            :on-change #(set-name! :blue (-> % .-target .-value))}]]]
+        [:tr
+         [:td
+          [:label {:for "green-name" :style {:color "green"}} "green"]]
+         [:td
+          [:input
+           {:type "text"
+            :name "green-name"
+            :value (get-name :green)
+            :on-change #(set-name! :green (-> % .-target .-value))}]]]
+        [:tr
+         [:td
+          [:label {:for "orange-name" :style {:color "orange"}} "orange"]]
+         [:td
+          [:input
+           {:type "text"
+            :name "orange-name"
+            :value (get-name :orange)
+            :on-change #(set-name! :orange (-> % .-target .-value))}]]]
+        [:tr
+         [:td
+          [:label {:for "red-name" :style {:color "red"}} "red"]]
+         [:td
+          [:input
+           {:type "text"
+            :name "red-name"
+            :value (get-name :red)
+            :on-change #(set-name! :red (-> % .-target .-value))}]]]
+        [:tr
+         [:td {:colSpan 2}
+          [:center
+           [:button {:class "myButton"
+                     :on-click (fn btn-click [e]
+                                 (new-game!))}
+            "Start"]]]]]]])
    [:div
     {:style {:float "left" :margin-left 10 :margin-right 10}}
     (-> [:svg
