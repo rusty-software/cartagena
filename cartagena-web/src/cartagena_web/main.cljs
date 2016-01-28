@@ -5,7 +5,8 @@
 (enable-console-print!)
 
 (defonce app-state (atom nil))
-(defonce names (atom {:black nil :blue nil :green nil :orange nil :red nil}))
+(def empty-names {:black nil :blue nil :green nil :orange nil :red nil})
+(defonce names (atom empty-names))
 
 (defn set-name! [color name]
   (swap! names assoc color name))
@@ -104,8 +105,7 @@
    ;; transition 3
    {:x 450 :y 210}
    ;; ship
-   {:x 400 :y 240}
-   ])
+   {:x 400 :y 240}])
 
 ;; TODO: duplicated from server code
 (defn active-player
@@ -117,7 +117,6 @@
   (.log js/console (str "ERROR [" status "] " status-text)))
 
 (defn on-new-game [response]
-  (println "on-new-game" response)
   (reset! app-state response))
 
 (defn new-game! []
@@ -126,11 +125,11 @@
                         (get-name :blue) (conj {:name (get-name :blue) :color :blue})
                         (get-name :green) (conj {:name (get-name :green) :color :green})
                         (get-name :orange) (conj {:name (get-name :orange) :color :orange})
-                        (get-name :red) (conj {:name (get-name :red) :color :red})
-                        )]
+                        (get-name :red) (conj {:name (get-name :red) :color :red}))]
   (reset! app-state (dissoc @app-state :select-players))
+  (swap! names empty-names)
   (ajax/POST "http://localhost:3000/new-game"
-             {:params {:players players}
+             {:params {:players (shuffle players)}
               :handler on-new-game
               :error-handler on-error})))
 
