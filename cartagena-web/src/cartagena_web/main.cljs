@@ -384,56 +384,60 @@
    (when-let [active-player (active-player @app-state)]
      (let [{:keys [color cards] player-name :name} active-player
            card-groups (frequencies cards)]
-       [:div {:style {:margin-right 10}}
-        [:table
-         {:class "t1"}
-         [:tbody
+       [:div
+        [:div {:style {:margin-right 10}}
+         [:table
+          {:class "t1"}
+          [:tbody
+           [:tr
+            [:td "Current Player"]
+            [:td player-name]]]
           [:tr
-           [:td "Current Player"]
-           [:td player-name]]]
-         [:tr
-          [:td "Color"]
-          [:td
-           [:svg
-            {:width (to-scale 20)
-             :height (to-scale 20)}
-            [:circle
-             {:cx (to-scale 10)
-              :cy (to-scale 10)
-              :r (to-scale 7)
-              :fill (name color)}]]
-           [:span {:style {:color (name color)}} (name color)]]]
-         [:tr
-          [:td "Actions Remaining"]
-          [:td (:actions-remaining @app-state)]]
-         [:tr
-          [:td "Cards"]
-          [:td (for [[card num] card-groups]
-                 ^{:key card}
-                 [:span {:style {:float "left"}}
-                  [:figure
+           [:td "Color"]
+           [:td
+            [:svg
+             {:width (to-scale 20)
+              :height (to-scale 20)}
+             [:circle
+              {:cx (to-scale 10)
+               :cy (to-scale 10)
+               :r (to-scale 7)
+               :fill (name color)}]]
+            [:span {:style {:color (name color)}} (name color)]]]
+          [:tr
+           [:td "Actions Remaining"]
+           [:td (:actions-remaining @app-state)]]
+          [:tr
+           [:td "Cards"]
+           [:td (for [[card num] card-groups]
+                  ^{:key card}
+                  [:span {:style {:float "left"}}
+                   [:figure
+                    [:img
+                     {:src (card icon-images)
+                      :width (to-scale 30)
+                      :height (to-scale 30)
+                      :on-click (fn img-click [e]
+                                  (select-card! card))}]
+                    [:center [:figcaption num]]]])]]
+          [:tr
+           [:td "Selected Card"]
+           [:td [:span {:style {:float "left"}}
+                 (when-let [selected-card (:selected-card @app-state)]
                    [:img
-                    {:src (card icon-images)
+                    {:src (selected-card icon-images)
                      :width (to-scale 30)
                      :height (to-scale 30)
                      :on-click (fn img-click [e]
-                                 (select-card! card))}]
-                   [:center [:figcaption num]]]])]]
-         [:tr
-          [:td "Selected Card"]
-          [:td [:span {:style {:float "left"}}
-                (when-let [selected-card (:selected-card @app-state)]
-                  [:img
-                   {:src (selected-card icon-images)
-                    :width (to-scale 30)
-                    :height (to-scale 30)
-                    :on-click (fn img-click [e]
-                                (unselect-card!))}])]]]
-         [:tr
-          [:td {:colSpan 2}
-           [:center
-            [:button {:on-click (fn btn-click [e]
-                                  (update-active-player! @app-state))} "Pass"]]]]]]))])
+                                 (unselect-card!))}])]]]
+          [:tr
+           [:td {:colSpan 2}
+            [:center
+             [:button {:on-click (fn btn-click [e]
+                                   (update-active-player! @app-state))} "Pass"]]]]]]
+        [:div
+         [:p "To move forward, click a card, then click the target pirate.  To undo card selection, click the selected card."]
+         [:p "To move backward, click the target pirate."]]]))])
 
 (defn ^:export main []
   (when-let [app (. js/document (getElementById "app"))]
