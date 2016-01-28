@@ -4,144 +4,6 @@
 
 (enable-console-print!)
 
-(def initial-game-state {:board [{:index 0,
-                                  :icon :jail,
-                                  :pirates [:orange :orange :orange :orange :orange :orange :black :black :black :black :black :black]}
-                                 {:index 1, :icon :key, :pirates []}
-                                 {:index 2, :icon :knife, :pirates []}
-                                 {:index 3, :icon :skull, :pirates []}
-                                 {:index 4, :icon :hat, :pirates []}
-                                 {:index 5, :icon :gun, :pirates []}
-                                 {:index 6, :icon :bottle, :pirates []}
-                                 {:index 7, :icon :skull, :pirates []}
-                                 {:index 8, :icon :hat, :pirates []}
-                                 {:index 9, :icon :gun, :pirates []}
-                                 {:index 10, :icon :key, :pirates []}
-                                 {:index 11, :icon :bottle, :pirates []}
-                                 {:index 12, :icon :knife, :pirates []}
-                                 {:index 13, :icon :hat, :pirates []}
-                                 {:index 14, :icon :key, :pirates []}
-                                 {:index 15, :icon :gun, :pirates []}
-                                 {:index 16, :icon :bottle, :pirates []}
-                                 {:index 17, :icon :skull, :pirates []}
-                                 {:index 18, :icon :knife, :pirates []}
-                                 {:index 19, :icon :gun, :pirates []}
-                                 {:index 20, :icon :hat, :pirates []}
-                                 {:index 21, :icon :knife, :pirates []}
-                                 {:index 22, :icon :skull, :pirates []}
-                                 {:index 23, :icon :bottle, :pirates []}
-                                 {:index 24, :icon :key, :pirates []}
-                                 {:index 25, :icon :gun, :pirates []}
-                                 {:index 26, :icon :key, :pirates []}
-                                 {:index 27, :icon :knife, :pirates []}
-                                 {:index 28, :icon :hat, :pirates []}
-                                 {:index 29, :icon :skull, :pirates []}
-                                 {:index 30, :icon :bottle, :pirates []}
-                                 {:index 31, :icon :skull, :pirates []}
-                                 {:index 32, :icon :gun, :pirates []}
-                                 {:index 33, :icon :bottle, :pirates []}
-                                 {:index 34, :icon :key, :pirates []}
-                                 {:index 35, :icon :knife, :pirates []}
-                                 {:index 36, :icon :hat, :pirates []}
-                                 {:index 37, :icon :ship, :pirates []}],
-                         :players [{:name "tanya", :color :orange, :cards [:hat :skull :knife :gun :bottle :key :gun]}
-                                   {:name "rusty", :color :black, :cards [:hat :gun :knife :gun :bottle :skull]}],
-                         :player-order ["tanya" "rusty"],
-                         :current-player "tanya",
-                         :actions-remaining 3,
-                         :draw-pile [:key
-                                     :bottle
-                                     :gun
-                                     :knife
-                                     :skull
-                                     :skull
-                                     :bottle
-                                     :key
-                                     :gun
-                                     :skull
-                                     :gun
-                                     :key
-                                     :skull
-                                     :key
-                                     :bottle
-                                     :skull
-                                     :key
-                                     :bottle
-                                     :bottle
-                                     :knife
-                                     :hat
-                                     :knife
-                                     :knife
-                                     :knife
-                                     :skull
-                                     :hat
-                                     :skull
-                                     :skull
-                                     :bottle
-                                     :key
-                                     :gun
-                                     :hat
-                                     :hat
-                                     :gun
-                                     :gun
-                                     :bottle
-                                     :key
-                                     :hat
-                                     :hat
-                                     :knife
-                                     :skull
-                                     :gun
-                                     :key
-                                     :skull
-                                     :hat
-                                     :bottle
-                                     :bottle
-                                     :skull
-                                     :gun
-                                     :hat
-                                     :knife
-                                     :key
-                                     :knife
-                                     :knife
-                                     :gun
-                                     :skull
-                                     :key
-                                     :hat
-                                     :hat
-                                     :bottle
-                                     :key
-                                     :knife
-                                     :knife
-                                     :skull
-                                     :key
-                                     :gun
-                                     :knife
-                                     :key
-                                     :bottle
-                                     :gun
-                                     :bottle
-                                     :skull
-                                     :hat
-                                     :key
-                                     :gun
-                                     :knife
-                                     :hat
-                                     :knife
-                                     :hat
-                                     :knife
-                                     :bottle
-                                     :key
-                                     :hat
-                                     :gun
-                                     :bottle
-                                     :hat
-                                     :gun
-                                     :key
-                                     :bottle
-                                     :skull],
-                         :discard-pile []}
-  )
-
 (defonce app-state (atom nil))
 
 (defn to-scale [n]
@@ -269,12 +131,27 @@
               :handler on-update-active-player
               :error on-error}))
 
+;; TODO: figure out a way to make this work elegantly with callbacks
+;; swiped from server code
+(defn game-over?
+  "Returns truthy if a player has 6 pirates on the ship; otherwise nil."
+  [board]
+  (let [ship (first (filter #(= :ship (:icon %)) board))
+        pirate-counts-by-color (frequencies (:pirates ship))]
+    (some #(>= (second %) 6) pirate-counts-by-color)))
+
+(defn end-game! []
+  (reset! app-state (assoc @app-state :game-over true)))
+
 (defn on-play-card [response]
-  (reset! app-state (assoc @app-state :board (:board response)
-                                      :discard-pile (:discard-pile response)
-                                      :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
-  (reset! app-state (dissoc @app-state :selected-card))
-  (update-active-player! @app-state))
+  (let [board (:board response)]
+    (reset! app-state (assoc @app-state :board (:board response)
+                                        :discard-pile (:discard-pile response)
+                                        :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
+    (reset! app-state (dissoc @app-state :selected-card))
+    (if (game-over? board)
+      (end-game!)
+      (update-active-player! @app-state))))
 
 (defn play-card! [player card from-space board discard-pile]
   (ajax/POST "http://localhost:3000/play-card"
@@ -412,7 +289,12 @@
       :on-click (fn button-click [e]
                   (new-game!))}
      "New Game"]]
+   (when (and @app-state (:game-over @app-state))
+     [:div
+      [:h2 "WE HAVE A WINNER!"]
+      [:h3 (str "Congratulations, " (:name (active-player @app-state)) "!")]])
    [:div
+    {:style {:float "left" :margin-left 10 :margin-right 10}}
     (-> [:svg
          {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
           :width (to-scale 501)
@@ -425,7 +307,7 @@
    (when-let [active-player (active-player @app-state)]
      (let [{:keys [color cards] player-name :name} active-player
            card-groups (frequencies cards)]
-       [:div
+       [:div {:style {:margin-right 10}}
         [:table
          {:class "t1"}
          [:tbody
