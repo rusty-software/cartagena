@@ -48,14 +48,14 @@
     {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/jail.png\" x=0 y=0 width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
    ;; ship
    [:rect
-    {:x (to-scale 400)
+    {:x (to-scale 410)
      :y (to-scale 240)
-     :width (to-scale 90)
+     :width (to-scale 80)
      :height (to-scale 60)
      :stroke "black"
      :fill "sienna"}]
    [:g
-    {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/ship.png\" x=\"" (to-scale 400) "\" y=\"" (to-scale 240) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
+    {:dangerouslySetInnerHTML {:__html (str "<image xlink:href=\"img/ship.png\" x=\"" (to-scale 410) "\" y=\"" (to-scale 240) "\" width=\"" (to-scale 30) "\" height=\"" (to-scale 30) "\" />")}}]
    ])
 
 (def piece-positions
