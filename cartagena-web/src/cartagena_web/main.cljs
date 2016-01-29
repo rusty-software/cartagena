@@ -51,7 +51,7 @@
     {:x (to-scale 400)
      :y (to-scale 240)
      :width (to-scale 90)
-     :height (to-scale 50)
+     :height (to-scale 60)
      :stroke "black"
      :fill "sienna"}]
    [:g
