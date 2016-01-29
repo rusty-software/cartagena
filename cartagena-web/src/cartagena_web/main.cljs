@@ -302,92 +302,99 @@
    [:h1 "CARTAGENA"]
    [:div
     [:button
-     {:class "myButton"
+     {:class "btn btn-primary"
       :on-click (fn button-click [e]
                   (select-players!))}
      "New Game"]]
    (when (and @app-state (:game-over @app-state))
      [:div
+      {:class "row"}
       [:h2 "WE HAVE A WINNER!"]
       [:h3 (str "Congratulations, " (:name (active-player @app-state)) "!")]])
    (when (and @app-state (:select-players @app-state))
      [:div
-      [:table {:class "t1"}
-       [:thead
-        [:tr
-         [:th "Color"]
-         [:th "Player"]]]
-       [:tbody
-        [:tr
-         [:td
-          [:label {:for "black-name" :style {:color "black"}} "black"]]
-         [:td
-          [:input
-           {:type "text"
-            :name "black-name"
-            :value (get-name :black)
-            :on-change #(set-name! :black (-> % .-target .-value))}]]]
-        [:tr
-         [:td
-          [:label {:for "blue-name" :style {:color "blue"}} "blue"]]
-         [:td
-          [:input
-           {:type "text"
-            :name "blue-name"
-            :value (get-name :blue)
-            :on-change #(set-name! :blue (-> % .-target .-value))}]]]
-        [:tr
-         [:td
-          [:label {:for "green-name" :style {:color "green"}} "green"]]
-         [:td
-          [:input
-           {:type "text"
-            :name "green-name"
-            :value (get-name :green)
-            :on-change #(set-name! :green (-> % .-target .-value))}]]]
-        [:tr
-         [:td
-          [:label {:for "orange-name" :style {:color "orange"}} "orange"]]
-         [:td
-          [:input
-           {:type "text"
-            :name "orange-name"
-            :value (get-name :orange)
-            :on-change #(set-name! :orange (-> % .-target .-value))}]]]
-        [:tr
-         [:td
-          [:label {:for "red-name" :style {:color "red"}} "red"]]
-         [:td
-          [:input
-           {:type "text"
-            :name "red-name"
-            :value (get-name :red)
-            :on-change #(set-name! :red (-> % .-target .-value))}]]]
-        [:tr
-         [:td {:colSpan 2}
-          [:center
-           [:button {:class "myButton"
-                     :on-click (fn btn-click [e]
-                                 (new-game!))}
-            "Start"]]]]]]])
+      {:class "row"}
+      [:div
+       {:class "col-md-4 col-md-offset-4"}
+       [:table {:class "table table-bordered"}
+        [:thead
+         [:tr
+          [:th "Color"]
+          [:th "Player"]]]
+        [:tbody
+         [:tr
+          [:td
+           [:label {:for "black-name" :style {:color "black"}} "black"]]
+          [:td
+           [:input
+            {:type "text"
+             :name "black-name"
+             :value (get-name :black)
+             :on-change #(set-name! :black (-> % .-target .-value))}]]]
+         [:tr
+          [:td
+           [:label {:for "blue-name" :style {:color "blue"}} "blue"]]
+          [:td
+           [:input
+            {:type "text"
+             :name "blue-name"
+             :value (get-name :blue)
+             :on-change #(set-name! :blue (-> % .-target .-value))}]]]
+         [:tr
+          [:td
+           [:label {:for "green-name" :style {:color "green"}} "green"]]
+          [:td
+           [:input
+            {:type "text"
+             :name "green-name"
+             :value (get-name :green)
+             :on-change #(set-name! :green (-> % .-target .-value))}]]]
+         [:tr
+          [:td
+           [:label {:for "orange-name" :style {:color "orange"}} "orange"]]
+          [:td
+           [:input
+            {:type "text"
+             :name "orange-name"
+             :value (get-name :orange)
+             :on-change #(set-name! :orange (-> % .-target .-value))}]]]
+         [:tr
+          [:td
+           [:label {:for "red-name" :style {:color "red"}} "red"]]
+          [:td
+           [:input
+            {:type "text"
+             :name "red-name"
+             :value (get-name :red)
+             :on-change #(set-name! :red (-> % .-target .-value))}]]]
+         [:tr
+          [:td {:colSpan 2}
+           [:center
+            [:button {:class "btn btn-success"
+                      :on-click (fn btn-click [e]
+                                  (new-game!))}
+             "Start"]]]]]]]])
    [:div
-    {:style {:float "left" :margin-left 10 :margin-right 10}}
-    (-> [:svg
-         {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
-          :width (to-scale 501)
-          :height (to-scale 301)}]
-        (into (static-board))
-        (into (normal-spaces))
-        (into (jail))
-        (into (ship))
-        )]
+    {:class "row"
+     :style {:float "left" :margin-left 10 :margin-right 10}}
+    [:div
+     {:class "col-md-5"}
+     (-> [:svg
+          {:view-box (str "0 0 " (to-scale 501) " " (to-scale 301))
+           :width (to-scale 501)
+           :height (to-scale 301)}]
+         (into (static-board))
+         (into (normal-spaces))
+         (into (jail))
+         (into (ship))
+         )]]
    (when-let [active-player (active-player @app-state)]
      (let [{:keys [color cards] player-name :name} active-player
            card-groups (frequencies cards)]
        [:div
+        {:class "col-md-4"}
         [:div {:style {:margin-right 10}}
-         [:table
-          {:class "t1"}
+         [:table {:class "table table-bordered table-responsive"}
           [:tbody
            [:tr
             [:td "Current Player"]
@@ -433,7 +440,9 @@
           [:tr
            [:td {:colSpan 2}
             [:center
-             [:button {:on-click (fn btn-click [e]
+             [:button
+              {:class "btn"
+               :on-click (fn btn-click [e]
                                    (update-active-player! @app-state))} "Pass"]]]]]]
         [:div
          [:p "To move forward, click a card, then click the target pirate.  To undo card selection, click the selected card."]
