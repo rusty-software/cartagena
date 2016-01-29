@@ -1,0 +1,11 @@
+New game (Local)
+  Done (ish)
+
+New game (Remote)
+  Originator
+    game session code is generated and displayed
+    waits for people to join
+      screen updates when people join the game
+      only 4 additional are allowed to join (max 5 players)
+    starts the game
+
