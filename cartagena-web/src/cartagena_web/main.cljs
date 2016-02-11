@@ -120,21 +120,21 @@
   (reset! app-state response))
 
 (defn new-game [state]
+  (dissoc state :selected-players))
+
+(defn new-game! []
   (let [players (cond-> []
                         (get-name :black) (conj {:name (get-name :black) :color :black})
                         (get-name :blue) (conj {:name (get-name :blue) :color :blue})
                         (get-name :green) (conj {:name (get-name :green) :color :green})
                         (get-name :orange) (conj {:name (get-name :orange) :color :orange})
                         (get-name :red) (conj {:name (get-name :red) :color :red}))]
-    (dissoc state :selected-players)))
-
-(defn new-game! []
-  (swap! app-state new-game)
-  (swap! names empty-names)
-  (ajax/POST "http://localhost:3000/new-game"
-             {:params {:players (shuffle players)}
-              :handler on-new-game
-              :error-handler on-error}))
+    (swap! app-state new-game)
+    (swap! names empty-names)
+    (ajax/POST "http://localhost:3000/new-game"
+               {:params {:players (shuffle players)}
+                :handler on-new-game
+                :error-handler on-error})))
 
 (defn select-players [state]
   (assoc state :select-players true))
@@ -144,7 +144,7 @@
 
 (defn update-active-player [state response]
   (assoc state :actions-remaining (:actions-remaining response)
-         :current-player (:current-player response)))
+               :current-player (:current-player response)))
 
 (defn on-update-active-player [response]
   (swap! app-state update-active-player response))
@@ -196,7 +196,7 @@
               :handler on-play-card
               :error-handler on-error}))
 
-(defn move-back [state response]
+(defn move-back [state board response]
   (assoc state :board board
          :draw-pile (:draw-pile response)
          :discard-pile (:discard-pile response)
@@ -204,7 +204,7 @@
 
 (defn on-move-back [response]
   (when-let [board (:board response)]
-    (swap! app-state move-back response)
+    (swap! app-state move-back board response)
     (update-active-player! @app-state)))
 
 (defn move-back! [player from-space board draw-pile discard-pile]
