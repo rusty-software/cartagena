@@ -119,26 +119,35 @@
 (defn on-new-game [response]
   (reset! app-state response))
 
-(defn new-game! []
+(defn new-game [state]
   (let [players (cond-> []
                         (get-name :black) (conj {:name (get-name :black) :color :black})
                         (get-name :blue) (conj {:name (get-name :blue) :color :blue})
                         (get-name :green) (conj {:name (get-name :green) :color :green})
                         (get-name :orange) (conj {:name (get-name :orange) :color :orange})
                         (get-name :red) (conj {:name (get-name :red) :color :red}))]
-  (reset! app-state (dissoc @app-state :select-players))
+    (dissoc state :selected-players)))
+
+(defn new-game! []
+  (swap! app-state new-game)
   (swap! names empty-names)
   (ajax/POST "http://localhost:3000/new-game"
              {:params {:players (shuffle players)}
               :handler on-new-game
-              :error-handler on-error})))
+              :error-handler on-error}))
+
+(defn select-players [state]
+  (assoc state :select-players true))
 
 (defn select-players! []
-  (reset! app-state (assoc @app-state :select-players true)))
+  (swap! app-state select-players))
+
+(defn update-active-player [state response]
+  (assoc state :actions-remaining (:actions-remaining response)
+         :current-player (:current-player response)))
 
 (defn on-update-active-player [response]
-  (reset! app-state (assoc @app-state :actions-remaining (:actions-remaining response)
-                                     :current-player (:current-player response))))
+  (swap! app-state update-active-player response))
 
 (defn update-active-player! [{:keys [actions-remaining current-player player-order]}]
   (ajax/POST "http://localhost:3000/update-active-player"
@@ -157,15 +166,22 @@
         pirate-counts-by-color (frequencies (:pirates ship))]
     (some #(>= (second %) 6) pirate-counts-by-color)))
 
+(defn end-game [state]
+  (assoc state :game-over true))
+
 (defn end-game! []
-  (reset! app-state (assoc @app-state :game-over true)))
+  (swap! app-state end-game))
+
+(defn play-card [state response]
+  (-> state
+      (assoc :board (:board response)
+             :discard-pile (:discard-pile response)
+             :players (conj (remove #{(active-player state)} (:players state)) (:player response)))
+      (dissoc state :selected-card)))
 
 (defn on-play-card [response]
   (let [board (:board response)]
-    (reset! app-state (assoc @app-state :board (:board response)
-                                        :discard-pile (:discard-pile response)
-                                        :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
-    (reset! app-state (dissoc @app-state :selected-card))
+    (swap! app-state play-card response)
     (if (game-over? board)
       (end-game!)
       (update-active-player! @app-state))))
@@ -180,12 +196,15 @@
               :handler on-play-card
               :error-handler on-error}))
 
+(defn move-back [state response]
+  (assoc state :board board
+         :draw-pile (:draw-pile response)
+         :discard-pile (:discard-pile response)
+         :players (conj (remove #{(active-player state)} (:players state)) (:player response))))
+
 (defn on-move-back [response]
   (when-let [board (:board response)]
-    (reset! app-state (assoc @app-state :board board
-                                        :draw-pile (:draw-pile response)
-                                        :discard-pile (:discard-pile response)
-                                        :players (conj (remove #{(active-player @app-state)} (:players @app-state)) (:player response))))
+    (swap! app-state move-back response)
     (update-active-player! @app-state)))
 
 (defn move-back! [player from-space board draw-pile discard-pile]
